@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+  
+  
+  <entry>
+    <title>orc和parquet</title>
+    <link href="/2022/02/09/orc-vs-parquet-md/"/>
+    <url>/2022/02/09/orc-vs-parquet-md/</url>
+    
+    <content type="html"><![CDATA[<h1 id="orc-vs-parquet"><a href="#orc-vs-parquet" class="headerlink" title="orc vs parquet"></a>orc vs parquet</h1><p>orc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。</p><h2 id="列式存储的优势"><a href="#列式存储的优势" class="headerlink" title="列式存储的优势"></a>列式存储的优势</h2><p>列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不需要的列，其实也是我们在hive、spark等olap等引擎中最常用的优化手段，通过只读取我们需要的列，可以很大程度上面减少io提高我们分析的性能。其次就是通过列式存储，我们可以对列、块、页等数据结构添加上我们需要的索引，通过这些索引和offset我们就可以很好的在数据文件上面使用谓词下推，进一步过滤掉我们不需要的数据，除了索引之外orc和parquet都使用了布隆过滤器，通过添加对字段的布隆过滤器来过滤掉无用的数据，从而使我们的计算更加高效。</p><h2 id="orc-vs-parquet-1"><a href="#orc-vs-parquet-1" class="headerlink" title="orc vs parquet"></a>orc vs parquet</h2><p>1、支持类型上，parquet通过sriping&#x2F;assembly算法完美支持嵌套结构。orc支持复杂的数据类型，对嵌套类型支持较差。<br>2、索引上，parquet和orc都有统计信息以及offset索引，并且都支持列的布隆过滤器。<br>3、文件结构上，parquet是row group、column chunk、pag。orc是stipe、row group、stream。总体结构上面比较类似<br>4、压缩上面，parquet支持snappy、gzip、lzo、brotli、lz4、zstd、lz4_raw；orc支持snappy、zlib、none三种<br>5、扩展性上，parquet支持的组件扩展性更好，对于spark也是默认的存储。而orc是rcfile的升级版本，对hive的支持性优化性更好。<br>6、parquet是cloudera开发的；orc是hortonworks开发的。现在俩家公司合并来了。<br>7、编码上：parquet支持更多的编码格式，<br>8、元数据：parquet使用thrift的TCompactProtocol进行元数据序列化，orc使用protocol buffer进行元数据的序列化</p><p>parquet相对于orc的优势：parquet通过sriping&#x2F;assembly算法完美支持嵌套类型，像json、thrift、protocolbuffer等通过defintion level和repeated leve方便对其进行编码以及压缩，parquet里面使用到的编码方式也更多：int、byte上可以使用增量编码来对数据进行编码。（如果需要支持复杂类型的旋用parquet更加有优势）。同时parqeut使cloudera和twitter创建的，拥有更广的适配性，像spark默认也是parquet存储的，适配性更好。</p><p>orc想对于parquet的优势：想对于parquet，orc支持acid以及update操作，如果在hive上面使用acid，像update merge delete这样的操作可以完美的支持，hive3对事务的支持更加完善了。因为orc就是为hadoop而生的，对hive的适配性更好，在hive上面使用拥有更好的压缩比例以及更好的查询性能。orc的拥有更细粒度的索引信息，能够更好的提高查询性能。</p>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>列式存储</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  
+</search>

@@ -1,228 +1,433 @@
+
+
 <!DOCTYPE html>
-<html lang="zh-Hans">
+<html lang="zh-Hans" data-default-color-scheme=auto>
+
+
 
 <head>
-    <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="leeseven-li">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="orc vs parquetorc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。 列式存储的优势列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不">
+<meta property="og:type" content="article">
+<meta property="og:title" content="orc和parquet">
+<meta property="og:url" content="http://example.com/2022/02/09/orc-vs-parquet-md/index.html">
+<meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分">
+<meta property="og:description" content="orc vs parquetorc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。 列式存储的优势列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不">
+<meta property="og:locale">
+<meta property="article:published_time" content="2022-02-09T09:39:17.000Z">
+<meta property="article:modified_time" content="2022-02-09T10:35:33.826Z">
+<meta property="article:author" content="leeseven-li">
+<meta property="article:tag" content="列式存储">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>orc和parquet - 大数据/开源/分</title>
 
-    <meta name="author" content="leeseven-li">
-
-
-
-
-
-<title>orc和parquet | 大数据/开源/分</title>
-
-
-
-    <link rel="icon" href="/favicon.ico">
-
-
-
-
-    <!-- stylesheets list from _config.yml -->
-    
-    <link rel="stylesheet" href="/css/style.css">
-    
-
-
-
-    <!-- scripts list from _config.yml -->
-    
-    <script src="/js/script.js"></script>
-    
-    <script src="/js/tocbot.min.js"></script>
-    
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
 
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
 
+  
     
     
-        
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
     
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
 <meta name="generator" content="Hexo 6.0.0"></head>
 
+
 <body>
-    <script>
-        // this function is used to check current theme before page loaded.
-        (() => {
-            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
-            const isDark = currentTheme === 'dark';
-            const pagebody = document.getElementsByTagName('body')[0]
-            if (isDark) {
-                pagebody.classList.add('dark-theme');
-                // mobile
-                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
-            } else {
-                pagebody.classList.remove('dark-theme');
-                // mobile
-                document.getElementById("mobile-toggle-theme").innerText = "· Light"
-            }
-        })();
-    </script>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
 
-    <div class="wrapper">
-        <header>
-    <nav class="navbar">
-        <div class="container">
-            <div class="navbar-header header-logo"><a href="/">Leeseven&#39;s 博客</a></div>
-            <div class="menu navbar-right">
-                
-                    <a class="menu-item" href="/archives">文章</a>
-                
-                    <a class="menu-item" href="/category">类别</a>
-                
-                    <a class="menu-item" href="/tag">标签</a>
-                
-                    <a class="menu-item" href="/about">About</a>
-                
-                <input id="switch_default" type="checkbox" class="switch_default">
-                <label for="switch_default" class="toggleBtn"></label>
-            </div>
-        </div>
-    </nav>
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
 
-    
-    <nav class="navbar-mobile" id="nav-mobile">
-        <div class="container">
-            <div class="navbar-header">
-                <div>
-                    <a href="/">Leeseven&#39;s 博客</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
-                </div>
-                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
-            </div>
-            <div class="menu" id="mobile-menu">
-                
-                    <a class="menu-item" href="/archives">文章</a>
-                
-                    <a class="menu-item" href="/category">类别</a>
-                
-                    <a class="menu-item" href="/tag">标签</a>
-                
-                    <a class="menu-item" href="/about">About</a>
-                
-            </div>
-        </div>
-    </nav>
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Startseite
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archiv
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Kategorie
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Etiketten
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                Über mich
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
 
-</header>
-<script>
-    var mobileBtn = function f() {
-        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
-        var mobileMenu = document.getElementById("mobile-menu");
-        if(toggleMenu.classList.contains("active")){
-           toggleMenu.classList.remove("active")
-            mobileMenu.classList.remove("active")
-        }else{
-            toggleMenu.classList.add("active")
-            mobileMenu.classList.add("active")
-        }
-    }
-</script>
-            <div class="main">
-                <div class="container">
-    
-    
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="orc和parquet">
+              
+            </span>
 
-    
-    <article class="post-wrap">
-        <header class="post-header">
-            <h1 class="post-title">orc和parquet</h1>
             
-                <div class="post-meta">
-                    
-                        Author: <a itemprop="author" rel="author" href="/">leeseven-li</a>
-                    
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-02-09 17:39" pubdate>
+        February 9, 2022 pm
+      </time>
+    </span>
+  
+</div>
 
-                    
-                        <span class="post-time">
-                        Date: <a href="#">February 9, 2022&nbsp;&nbsp;17:39:17</a>
-                        </span>
-                    
-                    
-                </div>
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.4k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      12 分钟
+    </span>
+  
+
+  
+  
+</div>
+
             
-        </header>
+          </div>
 
-        <div class="post-content">
-            <p>#orc vs parquet</p>
-<p>orc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。</p>
-<p>##列式存储的优势</p>
-<p>列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不需要的列，其实也是我们在hive、spark等olap等引擎中最常用的优化手段，通过只读取我们需要的列，可以很大程度上面减少io提高我们分析的性能。其次就是通过列式存储，我们可以对列、块、页等数据结构添加上我们需要的索引，通过这些索引和offset我们就可以很好的在数据文件上面使用谓词下推，进一步过滤掉我们不需要的数据，除了索引之外orc和parquet都使用了布隆过滤器，通过添加对字段的布隆过滤器来过滤掉无用的数据，从而使我们的计算更加高效。</p>
-<p>##orc vs parquet</p>
-<p>1、支持类型上，parquet通过sriping&#x2F;assembly算法完美支持嵌套结构。orc支持复杂的数据类型，对嵌套类型支持较差。<br>2、索引上，parquet和orc都有统计信息以及offset索引，并且都支持列的布隆过滤器。<br>3、文件结构上，parquet是row group、column chunk、pag。orc是stipe、row group、stream。总体结构上面比较类似<br>4、压缩上面，parquet支持snappy、gzip、lzo、brotli、lz4、zstd、lz4_raw；orc支持snappy、zlib、none三种<br>5、扩展性上，parquet支持的组件扩展性更好，对于spark也是默认的存储。而orc是rcfile的升级版本，对hive的支持性优化性更好。<br>6、parquet是cloudera开发的；orc是hortonworks开发的。现在俩家公司合并来了。<br>7、编码上：parquet支持更多的编码格式，<br>8、元数据：parquet使用thrift的TCompactProtocol进行元数据序列化，orc使用protocol buffer进行元数据的序列化</p>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">orc和parquet</h1>
+            
+            <div class="markdown-body">
+              <h1 id="orc-vs-parquet"><a href="#orc-vs-parquet" class="headerlink" title="orc vs parquet"></a>orc vs parquet</h1><p>orc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。</p>
+<h2 id="列式存储的优势"><a href="#列式存储的优势" class="headerlink" title="列式存储的优势"></a>列式存储的优势</h2><p>列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不需要的列，其实也是我们在hive、spark等olap等引擎中最常用的优化手段，通过只读取我们需要的列，可以很大程度上面减少io提高我们分析的性能。其次就是通过列式存储，我们可以对列、块、页等数据结构添加上我们需要的索引，通过这些索引和offset我们就可以很好的在数据文件上面使用谓词下推，进一步过滤掉我们不需要的数据，除了索引之外orc和parquet都使用了布隆过滤器，通过添加对字段的布隆过滤器来过滤掉无用的数据，从而使我们的计算更加高效。</p>
+<h2 id="orc-vs-parquet-1"><a href="#orc-vs-parquet-1" class="headerlink" title="orc vs parquet"></a>orc vs parquet</h2><p>1、支持类型上，parquet通过sriping&#x2F;assembly算法完美支持嵌套结构。orc支持复杂的数据类型，对嵌套类型支持较差。<br>2、索引上，parquet和orc都有统计信息以及offset索引，并且都支持列的布隆过滤器。<br>3、文件结构上，parquet是row group、column chunk、pag。orc是stipe、row group、stream。总体结构上面比较类似<br>4、压缩上面，parquet支持snappy、gzip、lzo、brotli、lz4、zstd、lz4_raw；orc支持snappy、zlib、none三种<br>5、扩展性上，parquet支持的组件扩展性更好，对于spark也是默认的存储。而orc是rcfile的升级版本，对hive的支持性优化性更好。<br>6、parquet是cloudera开发的；orc是hortonworks开发的。现在俩家公司合并来了。<br>7、编码上：parquet支持更多的编码格式，<br>8、元数据：parquet使用thrift的TCompactProtocol进行元数据序列化，orc使用protocol buffer进行元数据的序列化</p>
 <p>parquet相对于orc的优势：parquet通过sriping&#x2F;assembly算法完美支持嵌套类型，像json、thrift、protocolbuffer等通过defintion level和repeated leve方便对其进行编码以及压缩，parquet里面使用到的编码方式也更多：int、byte上可以使用增量编码来对数据进行编码。（如果需要支持复杂类型的旋用parquet更加有优势）。同时parqeut使cloudera和twitter创建的，拥有更广的适配性，像spark默认也是parquet存储的，适配性更好。</p>
 <p>orc想对于parquet的优势：想对于parquet，orc支持acid以及update操作，如果在hive上面使用acid，像update merge delete这样的操作可以完美的支持，hive3对事务的支持更加完善了。因为orc就是为hadoop而生的，对hive的适配性更好，在hive上面使用拥有更好的压缩比例以及更好的查询性能。orc的拥有更细粒度的索引信息，能够更好的提高查询性能。</p>
 
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/%E5%88%97%E5%BC%8F%E5%AD%98%E5%82%A8/">列式存储</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
         </div>
-
-        
-            <section class="post-copyright">
-                
-                    <p class="copyright-item">
-                        <span>Author:</span>
-                        <span>leeseven-li</span>
-                    </p>
-                
-                
-                    <p class="copyright-item">
-                        <span>Permalink:</span>
-                        <span><a href="http://example.com/2022/02/09/orc-vs-parquet-md/">http://example.com/2022/02/09/orc-vs-parquet-md/</a></span>
-                    </p>
-                
-                
-                    <p class="copyright-item">
-                        <span>License:</span>
-                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
-                    </p>
-                
-                
-                     <p class="copyright-item">
-                         <span>Slogan:</span>
-                         <span>Do you believe in <strong>DESTINY</strong>?</span>
-                     </p>
-                
-
-            </section>
-        
-        <section class="post-tags">
-            <div>
-                <span>Tag(s):</span>
-                <span class="tag">
-                    
-                    
-                        <a href="/tags/%E5%88%97%E5%BC%8F%E5%AD%98%E5%82%A8/"># 列式存储</a>
-                    
-                        
-                </span>
-            </div>
-            <div>
-                <a href="javascript:window.history.back();">back</a>
-                <span>· </span>
-                <a href="/">home</a>
-            </div>
-        </section>
-        <section class="post-nav">
-            
-            
-        </section>
-
-
-    </article>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
 </div>
 
-            </div>
-            <footer id="footer" class="footer">
-    <div class="copyright">
-        <span>© leeseven-li | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Suchen</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">Stichwort</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
     </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+
+  
+
+  
 </footer>
 
-    </div>
-</body>
 
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
 </html>
