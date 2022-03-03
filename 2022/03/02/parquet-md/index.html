@@ -16,15 +16,15 @@
   <meta name="author" content="leeseven-li">
   <meta name="keywords" content="">
   
-    <meta name="description" content="#PARQUET ##优势 12341、更高的压缩比可以减少磁盘的使用2、更少的IO操作使用映射下推和谓词下推，可以读取需要的列，过滤掉不需要的列，减少不必要的数据扫描，尤其对于表字段比较多的时候优势明显。&gt; 映射下推：列式存储最突出的优势，数据扫描的时候，只需要扫描需要的列，避免全表扫描&gt; 谓词下推：将过滤条件在最底层执行减少结果集  ##如何提升parquet的查询性能 121、对">
+    <meta name="description" content="PARQUET优势12341、更高的压缩比可以减少磁盘的使用2、更少的IO操作使用映射下推和谓词下推，可以读取需要的列，过滤掉不需要的列，减少不必要的数据扫描，尤其对于表字段比较多的时候优势明显。&gt; 映射下推：列式存储最突出的优势，数据扫描的时候，只需要扫描需要的列，避免全表扫描&gt; 谓词下推：将过滤条件在最底层执行减少结果集  如何提升parquet的查询性能121、对需要频繁过滤的列">
 <meta property="og:type" content="article">
 <meta property="og:title" content="parquet.md">
 <meta property="og:url" content="http://example.com/2022/03/02/parquet-md/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
-<meta property="og:description" content="#PARQUET ##优势 12341、更高的压缩比可以减少磁盘的使用2、更少的IO操作使用映射下推和谓词下推，可以读取需要的列，过滤掉不需要的列，减少不必要的数据扫描，尤其对于表字段比较多的时候优势明显。&gt; 映射下推：列式存储最突出的优势，数据扫描的时候，只需要扫描需要的列，避免全表扫描&gt; 谓词下推：将过滤条件在最底层执行减少结果集  ##如何提升parquet的查询性能 121、对">
+<meta property="og:description" content="PARQUET优势12341、更高的压缩比可以减少磁盘的使用2、更少的IO操作使用映射下推和谓词下推，可以读取需要的列，过滤掉不需要的列，减少不必要的数据扫描，尤其对于表字段比较多的时候优势明显。&gt; 映射下推：列式存储最突出的优势，数据扫描的时候，只需要扫描需要的列，避免全表扫描&gt; 谓词下推：将过滤条件在最底层执行减少结果集  如何提升parquet的查询性能121、对需要频繁过滤的列">
 <meta property="og:locale">
 <meta property="article:published_time" content="2022-03-02T09:28:37.000Z">
-<meta property="article:modified_time" content="2022-03-02T09:28:55.600Z">
+<meta property="article:modified_time" content="2022-03-03T01:25:16.646Z">
 <meta property="article:author" content="leeseven-li">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -196,7 +196,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      3.3k 字
+      3.2k 字
     </span>
   
 
@@ -205,17 +205,17 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      28 分钟
+      27 分钟
     </span>
   
 
   
   
     
-      <!-- 不蒜子统计文章PV -->
-      <span id="busuanzi_container_page_pv" style="display: none">
+      <!-- LeanCloud 统计文章PV -->
+      <span id="leancloud-page-views-container" class="post-meta" style="display: none">
         <i class="iconfont icon-eye" aria-hidden="true"></i>
-        <span id="busuanzi_value_page_pv"></span> 次
+        <span id="leancloud-page-views"></span> 次
       </span>
     
   
@@ -245,37 +245,31 @@
             <h1 style="display: none">parquet.md</h1>
             
             <div class="markdown-body">
-              <p>#PARQUET</p>
-<p>##优势</p>
-<figure class="highlight node-repl"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><pre><code class="hljs node-repl">1、更高的压缩比可以减少磁盘的使用<br>2、更少的IO操作使用映射下推和谓词下推，可以读取需要的列，过滤掉不需要的列，减少不必要的数据扫描，尤其对于表字段比较多的时候优势明显。<br><span class="hljs-meta">&gt;</span> <span class="language-javascript">映射下推：列式存储最突出的优势，数据扫描的时候，只需要扫描需要的列，避免全表扫描</span><br><span class="hljs-meta">&gt;</span> <span class="language-javascript">谓词下推：将过滤条件在最底层执行减少结果集</span><br></code></pre></td></tr></table></figure>
+              <h1 id="PARQUET"><a href="#PARQUET" class="headerlink" title="PARQUET"></a>PARQUET</h1><h2 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h2><figure class="highlight node-repl"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><pre><code class="hljs node-repl">1、更高的压缩比可以减少磁盘的使用<br>2、更少的IO操作使用映射下推和谓词下推，可以读取需要的列，过滤掉不需要的列，减少不必要的数据扫描，尤其对于表字段比较多的时候优势明显。<br><span class="hljs-meta">&gt;</span> <span class="language-javascript">映射下推：列式存储最突出的优势，数据扫描的时候，只需要扫描需要的列，避免全表扫描</span><br><span class="hljs-meta">&gt;</span> <span class="language-javascript">谓词下推：将过滤条件在最底层执行减少结果集</span><br></code></pre></td></tr></table></figure>
 
-<p>##如何提升parquet的查询性能</p>
-<figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mathematica"><span class="hljs-number">1</span>、对需要频繁过滤的列设置为有序的，这样在导入数据的时候会根据该列的顺序存储数据，这样可以更好的利用最大值最小值实现谓词下推<br><span class="hljs-number">2</span>、减少行组大小和页大小，这样增加跳过整个行组的可能性，但是此时需要权衡由于压缩和编码效率下降带来的<span class="hljs-built_in">I</span><span class="hljs-operator">/</span><span class="hljs-built_in">O</span>负载。<br></code></pre></td></tr></table></figure>
+<h2 id="如何提升parquet的查询性能"><a href="#如何提升parquet的查询性能" class="headerlink" title="如何提升parquet的查询性能"></a>如何提升parquet的查询性能</h2><figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mathematica"><span class="hljs-number">1</span>、对需要频繁过滤的列设置为有序的，这样在导入数据的时候会根据该列的顺序存储数据，这样可以更好的利用最大值最小值实现谓词下推<br><span class="hljs-number">2</span>、减少行组大小和页大小，这样增加跳过整个行组的可能性，但是此时需要权衡由于压缩和编码效率下降带来的<span class="hljs-built_in">I</span><span class="hljs-operator">/</span><span class="hljs-built_in">O</span>负载。<br></code></pre></td></tr></table></figure>
 
-<p>##文件格式<br>row group &gt; column chunk &gt; page</p>
+<h2 id="文件格式"><a href="#文件格式" class="headerlink" title="文件格式"></a>文件格式</h2><p>row group &gt; column chunk &gt; page</p>
 <figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs css">row group行组：每一个行组包含一定的行数，一般对应一个HDFS文件块，Parquet读写的时候会将整个行组缓存在内存中<br>column chunk列块：在一个行组中，每一列保存在一个列块中，一个列块中的类型都是相同的，不同类型的列块可以使用不同d的算法进行压缩。<br>page页：每一个列块被划分成多个页，页时最小的编码单位，在同一个列块的不同页可能使用不同的编码方式<br><br>一个parquet文件，在文件头和文件尾都是<span class="hljs-number">4</span>个字节的magic <span class="hljs-selector-tag">code</span>，校验是否是parquet文件。<br>然后尾部magic <span class="hljs-selector-tag">code</span>之前是<span class="hljs-selector-tag">footer</span> length，是文件元数据的大小，通过这个大小就可以计算出y元数据<span class="hljs-selector-tag">footer</span>的偏移量<br><span class="hljs-selector-tag">footer</span>中包括：<br><span class="hljs-number">1</span>、每个行组的元信息：由多少个列块组成；<br><span class="hljs-number">2</span>、每个列块的元信息：类型、路径、编码、第一个数据页的位置、第一个索引页的位置、压缩/未压缩大小、以及一些额外的配置kv<br><span class="hljs-number">3</span>、又有三种pag：<br>    数据页主要存储defination levels、repeatition levels、value<br>    字典页：存储列值的编码字段<br>    索引页：用来存储该页<br></code></pre></td></tr></table></figure>
 
-<p>##parquet的编码格式<br><a target="_blank" rel="noopener" href="https://github.com/apache/parquet-format/blob/master/Encodings.md">https://github.com/apache/parquet-format/blob/master/Encodings.md</a></p>
+<h2 id="parquet的编码格式"><a href="#parquet的编码格式" class="headerlink" title="parquet的编码格式"></a>parquet的编码格式</h2><p><a target="_blank" rel="noopener" href="https://github.com/apache/parquet-format/blob/master/Encodings.md">https://github.com/apache/parquet-format/blob/master/Encodings.md</a></p>
 <figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-number">0</span>、PLAIN：如果没有其他的有效编码就不进行编码，也就是plain<br><span class="hljs-number">2</span>、PLAIN_DICTIONARY /<span class="hljs-number">8</span>、RLE_DICTIONARY：原始数据的字典编码，字典存储在字典页中对应page中的字典页。字典中的值使用RLE/<span class="hljs-type">bit</span>-packing<br>回合编码存储位整数。<br>   字典页格式（PLAIN）：字典中的条数-按字典顺序-使用普通编码<br>   数据页格式：用于对存储位<span class="hljs-number">1</span>个字节条目id进行编码的位宽（最大<span class="hljs-number">32</span>位），这个id使用RLE/<span class="hljs-type">bit</span>-packing打包编码的值，在<span class="hljs-number">2.0</span>中使用RLE/<span class="hljs-keyword">DICTIONARY</span>   <br><span class="hljs-number">3</span>、Run Length <span class="hljs-keyword">Encoding</span> / <span class="hljs-type">Bit</span>-Packing Hybrid：这种编码使用位打包和运行长度编码的组合来更有效地存储重复值<br>   RLE:行程编码，重复的值计数。<br>   <span class="hljs-type">bit</span>-packing：位打包主要用来解决序列化所需要的位数<br><span class="hljs-number">4</span>、<span class="hljs-type">Bit</span>-packed：仅支持编码重复和定义级别<br><span class="hljs-number">5</span>、Delta <span class="hljs-keyword">Encoding</span>：int32、int64<br><span class="hljs-number">6</span>、Delta-length byte <span class="hljs-keyword">array</span>：BYTE_ARRAY<br><span class="hljs-number">7</span>、Delta Strings：BYTE_ARRAY<br><span class="hljs-number">9</span>、Byte Stream Split： <span class="hljs-type">FLOAT</span> <span class="hljs-type">DOUBLE</span><br></code></pre></td></tr></table></figure>
 
-<p>##parquet元数据使用什么序列化方式</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">parqut的元数据是在整个<span class="hljs-type">row</span> <span class="hljs-keyword">group</span>都写完成之后再进行写入的，这时候写入的文件的元数据信息全部都保存再了内存中，如果要读取的话也是需要把元数据全部都<br>读取到内存中才行。<br>把内存中的数据序列化到磁盘中，使用了thrift的TCompactProtocol高性能序列化方式。<br>thrit相对于其他序列化方式性能比较好，兼容性可能比较差。<br></code></pre></td></tr></table></figure>
+<h2 id="parquet元数据使用什么序列化方式"><a href="#parquet元数据使用什么序列化方式" class="headerlink" title="parquet元数据使用什么序列化方式"></a>parquet元数据使用什么序列化方式</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">parqut的元数据是在整个<span class="hljs-type">row</span> <span class="hljs-keyword">group</span>都写完成之后再进行写入的，这时候写入的文件的元数据信息全部都保存再了内存中，如果要读取的话也是需要把元数据全部都<br>读取到内存中才行。<br>把内存中的数据序列化到磁盘中，使用了thrift的TCompactProtocol高性能序列化方式。<br>thrit相对于其他序列化方式性能比较好，兼容性可能比较差。<br></code></pre></td></tr></table></figure>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_15080016/2620917">https://blog.51cto.com/u_15080016/2620917</a></p>
 </blockquote>
-<p>##Sriping&#x2F;Assembly算法</p>
-<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs stata">打散/组装算法，主要parquet如何打散和组装数据的。这个算法主要通过repetition <span class="hljs-keyword">levels</span>和definition <span class="hljs-keyword">levels</span>来描述文件的拆分和组装。重复级别主要<br>用来描述repeated的节点，在写入的适合等于它和前面的值从那一层节点不共享的。在读取的适合根据该值可以推断出哪一层需要创建一个新的节点；定义级别主要<br>用来记录哪些值使没有的使null值。可以很好的支持嵌套类型的存储。<br>repeated <span class="hljs-keyword">levels</span>主要是用来一列的作用的，defintition <span class="hljs-keyword">levels</span>用来描述一行的数据。主要防止一列有空值导致错位。<br>不同的列跳转使用了有限状态机<br></code></pre></td></tr></table></figure>
+<h2 id="Sriping-x2F-Assembly算法"><a href="#Sriping-x2F-Assembly算法" class="headerlink" title="Sriping&#x2F;Assembly算法"></a>Sriping&#x2F;Assembly算法</h2><figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs stata">打散/组装算法，主要parquet如何打散和组装数据的。这个算法主要通过repetition <span class="hljs-keyword">levels</span>和definition <span class="hljs-keyword">levels</span>来描述文件的拆分和组装。重复级别主要<br>用来描述repeated的节点，在写入的适合等于它和前面的值从那一层节点不共享的。在读取的适合根据该值可以推断出哪一层需要创建一个新的节点；定义级别主要<br>用来记录哪些值使没有的使null值。可以很好的支持嵌套类型的存储。<br>repeated <span class="hljs-keyword">levels</span>主要是用来一列的作用的，defintition <span class="hljs-keyword">levels</span>用来描述一行的数据。主要防止一列有空值导致错位。<br>不同的列跳转使用了有限状态机<br></code></pre></td></tr></table></figure>
 
-<p>##parquet的bloomfilter<br><a target="_blank" rel="noopener" href="https://github.com/apache/parquet-format/blob/master/BloomFilter.md">https://github.com/apache/parquet-format/blob/master/BloomFilter.md</a></p>
+<h2 id="parquet的bloomfilter"><a href="#parquet的bloomfilter" class="headerlink" title="parquet的bloomfilter"></a>parquet的bloomfilter</h2><p><a target="_blank" rel="noopener" href="https://github.com/apache/parquet-format/blob/master/BloomFilter.md">https://github.com/apache/parquet-format/blob/master/BloomFilter.md</a></p>
 <figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">我们都知道，在parquet和orc等列式存储中，都会用到一些索引和统计信息：记录下一些列的最大值最小值，记录字典等。，来对查询进行谓词下推，<br>直接下推到文件上面，减少数据的传输。谓词下推可以说是数据库查询优化的一大手段。<br>但是在有一些没有最大值最小值，字典太大、数据基数非常大的情况下布隆过滤器可以起到很好的优化操作。<br>布隆过滤器可以过滤掉肯定不存在的数据，可能存在的数据来相应查询。可能存在的数据又可以通过构建<span class="hljs-type">bit</span>数组的大小来决定的。<span class="hljs-type">bit</span>数据占用的空间<br>非常小，以至于用很小的空间就可以达到很好的过滤效果。<br>其实布隆过滤器主要的目标就是为·高基数·的列启用谓词下推，同时使用更少的存储空间。同时如果某一列没有启用布隆过滤器也不会影响性能。<br><br>parquet使用的是一种split block布隆过滤器。就是一个列有多个block，每个block有<span class="hljs-number">8</span>个小块组成，小块的话其实就是<span class="hljs-type">bit</span>数组。然后通过<br>加盐（对应<span class="hljs-type">int</span>就是*对应一个数组保存着<span class="hljs-number">8</span>个<span class="hljs-number">32</span>位的整数一一对应）移位来取得每个<span class="hljs-type">bit</span>数组中的具体位置，然后进行插入。其中就是为了把对应的<br>值进行散列，使用了奇数*常数右移的一种散列整数方法。块越多准确率越高<br><br>针对其他类型的数据，parquet使用xxhash来做的转换<br><br>数据的话也是相当于元数据使用的thrift做的序列化<br><br>bloomfilter存储在了footer下面的<span class="hljs-keyword">row</span> <span class="hljs-keyword">group</span>的<span class="hljs-keyword">column</span> chunk下面，作为列的元数据。<br>敏感信息应该使用列加密<br></code></pre></td></tr></table></figure>
 
-<p>##parquet文件支持哪些压缩方式</p>
-<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs avrasm"><span class="hljs-symbol">snappy:</span>google提供<br><span class="hljs-symbol">gzip:</span>基于RFC <span class="hljs-number">1952</span>定义的 GZIP 格式（zlib权威）<br><span class="hljs-symbol">lzo:</span><br><span class="hljs-symbol">brotli:</span><br><span class="hljs-symbol">lz4:</span><br><span class="hljs-symbol">zstd:</span><br><span class="hljs-symbol">lz4_raw:</span><br></code></pre></td></tr></table></figure>
+<h2 id="parquet文件支持哪些压缩方式"><a href="#parquet文件支持哪些压缩方式" class="headerlink" title="parquet文件支持哪些压缩方式"></a>parquet文件支持哪些压缩方式</h2><figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs avrasm"><span class="hljs-symbol">snappy:</span>google提供<br><span class="hljs-symbol">gzip:</span>基于RFC <span class="hljs-number">1952</span>定义的 GZIP 格式（zlib权威）<br><span class="hljs-symbol">lzo:</span><br><span class="hljs-symbol">brotli:</span><br><span class="hljs-symbol">lz4:</span><br><span class="hljs-symbol">zstd:</span><br><span class="hljs-symbol">lz4_raw:</span><br></code></pre></td></tr></table></figure>
 
-<p>##parquet支持哪些数据类型<br>文件格式的数据类型</p>
+<h2 id="parquet支持哪些数据类型"><a href="#parquet支持哪些数据类型" class="headerlink" title="parquet支持哪些数据类型"></a>parquet支持哪些数据类型</h2><p>文件格式的数据类型</p>
 <figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">BOOLEAN</span>：<span class="hljs-number">1</span> 位布尔值<br><span class="hljs-attribute">INT32</span>：<span class="hljs-number">32</span> 位有符号整数<br><span class="hljs-attribute">INT64</span>：<span class="hljs-number">64</span> 位有符号整数<br><span class="hljs-attribute">INT96</span>：<span class="hljs-number">96</span> 位有符号整数<br><span class="hljs-attribute">FLOAT</span>：IEEE <span class="hljs-number">32</span> 位浮点值<br><span class="hljs-attribute">DOUBLE</span>：IEEE <span class="hljs-number">64</span> 位浮点值<br><span class="hljs-attribute">BYTE_ARRAY</span>：任意长的字节数组。<br></code></pre></td></tr></table></figure>
-<p>逻辑数据类型<br>##parquet的列索引</p>
-<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs applescript">columnIndex和offsetIndex；索引的结构和长度存储在l了columnchunk中<br>columnIndex：这个可以根据制定的列值直接到数据页。可以用于谓词下推上面。<br>offsetindex：这个可以按照行数进行索引，这个主要用来其他列有了过滤，跳过许多数据，那么这个列也会根据<span class="hljs-built_in">offset</span>去挑过对应的数据。<br><span class="hljs-number">1</span>、索引里面右数据页的最大值和最小值<br><span class="hljs-number">2</span>、针对排序的列只需要读取包含数据相关的确定的数据页<br><span class="hljs-number">3</span>、针对于谓词下推，可以通过字典以及索引找到确定的索引页<br><span class="hljs-number">4</span>、如果不需要操作也不会带来额外的开销<br><span class="hljs-number">5</span>、如果是已经排序的，仅仅存储边界元素<br><span class="hljs-number">6</span>、对于有序的列还会运用二分查找<br></code></pre></td></tr></table></figure>
+<p>逻辑数据类型</p>
+<h2 id="parquet的列索引"><a href="#parquet的列索引" class="headerlink" title="parquet的列索引"></a>parquet的列索引</h2><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs applescript">columnIndex和offsetIndex；索引的结构和长度存储在l了columnchunk中<br>columnIndex：这个可以根据制定的列值直接到数据页。可以用于谓词下推上面。<br>offsetindex：这个可以按照行数进行索引，这个主要用来其他列有了过滤，跳过许多数据，那么这个列也会根据<span class="hljs-built_in">offset</span>去挑过对应的数据。<br><span class="hljs-number">1</span>、索引里面右数据页的最大值和最小值<br><span class="hljs-number">2</span>、针对排序的列只需要读取包含数据相关的确定的数据页<br><span class="hljs-number">3</span>、针对于谓词下推，可以通过字典以及索引找到确定的索引页<br><span class="hljs-number">4</span>、如果不需要操作也不会带来额外的开销<br><span class="hljs-number">5</span>、如果是已经排序的，仅仅存储边界元素<br><span class="hljs-number">6</span>、对于有序的列还会运用二分查找<br></code></pre></td></tr></table></figure>
 
 
             </div>
@@ -339,7 +333,7 @@
       window.UtterancesThemeDark = dark;
       var s = document.createElement('script');
       s.setAttribute('src', 'https://utteranc.es/client.js');
-      s.setAttribute('repo', 'leeseven-li/leeseven-li.github.io.git');
+      s.setAttribute('repo', 'leeseven-li/leeseven-li.github.io');
       s.setAttribute('issue-term', 'pathname');
       
       s.setAttribute('label', 'utterances');
@@ -470,8 +464,6 @@
   
 
 
-
-  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
 
 
 

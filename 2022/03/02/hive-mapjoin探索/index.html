@@ -16,15 +16,15 @@
   <meta name="author" content="leeseven-li">
   <meta name="keywords" content="">
   
-    <meta name="description" content="#让你真正了解mapjoin参数 首先创建好small_table和big_table俩个表。直接给俩个表执行join。 1234set hive.cbo.enable&#x3D;false;set hive.auto.convert.join&#x3D;false; set hive.auto.convert.join.noconditionaltask&#x3D;false; explain select t1.* fro">
+    <meta name="description" content="让你真正了解mapjoin参数首先创建好small_table和big_table俩个表。直接给俩个表执行join。 1234set hive.cbo.enable&#x3D;false;set hive.auto.convert.join&#x3D;false; set hive.auto.convert.join.noconditionaltask&#x3D;false; explain select t1.* from">
 <meta property="og:type" content="article">
 <meta property="og:title" content="hive-mapjoin探索">
 <meta property="og:url" content="http://example.com/2022/03/02/hive-mapjoin%E6%8E%A2%E7%B4%A2/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
-<meta property="og:description" content="#让你真正了解mapjoin参数 首先创建好small_table和big_table俩个表。直接给俩个表执行join。 1234set hive.cbo.enable&#x3D;false;set hive.auto.convert.join&#x3D;false; set hive.auto.convert.join.noconditionaltask&#x3D;false; explain select t1.* fro">
+<meta property="og:description" content="让你真正了解mapjoin参数首先创建好small_table和big_table俩个表。直接给俩个表执行join。 1234set hive.cbo.enable&#x3D;false;set hive.auto.convert.join&#x3D;false; set hive.auto.convert.join.noconditionaltask&#x3D;false; explain select t1.* from">
 <meta property="og:locale">
 <meta property="article:published_time" content="2022-03-02T09:32:53.000Z">
-<meta property="article:modified_time" content="2022-03-02T09:33:56.433Z">
+<meta property="article:modified_time" content="2022-03-03T01:25:16.643Z">
 <meta property="article:author" content="leeseven-li">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -212,10 +212,10 @@
   
   
     
-      <!-- 不蒜子统计文章PV -->
-      <span id="busuanzi_container_page_pv" style="display: none">
+      <!-- LeanCloud 统计文章PV -->
+      <span id="leancloud-page-views-container" class="post-meta" style="display: none">
         <i class="iconfont icon-eye" aria-hidden="true"></i>
-        <span id="busuanzi_value_page_pv"></span> 次
+        <span id="leancloud-page-views"></span> 次
       </span>
     
   
@@ -245,8 +245,7 @@
             <h1 style="display: none">hive-mapjoin探索</h1>
             
             <div class="markdown-body">
-              <p>#让你真正了解mapjoin参数</p>
-<p>首先创建好small_table和big_table俩个表。直接给俩个表执行join。</p>
+              <h1 id="让你真正了解mapjoin参数"><a href="#让你真正了解mapjoin参数" class="headerlink" title="让你真正了解mapjoin参数"></a>让你真正了解mapjoin参数</h1><p>首先创建好small_table和big_table俩个表。直接给俩个表执行join。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><pre><code class="hljs hiveql">set hive.cbo.enable=false;<br>set hive.auto.convert.join=false; <br>set hive.auto.convert.join.noconditionaltask=false; <br>explain select t1.* from small_table t1 join big_table t2 on t1.id = t2.id;<br></code></pre></td></tr></table></figure>
 <p>接下来分析执行计划，一共俩个stage，第一个stage是join，第二个是进行fetch数据</p>
 <figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">STAGE</span> DEPENDENCIES:<br>  <span class="hljs-attribute">Stage</span>-<span class="hljs-number">1</span> is a root stage<br>  <span class="hljs-attribute">Stage</span>-<span class="hljs-number">0</span> depends <span class="hljs-literal">on</span> stages: Stage-<span class="hljs-number">1</span> 其实stage0就是fetch算子，把结果拉到client端<br></code></pre></td></tr></table></figure>
@@ -333,7 +332,7 @@
       window.UtterancesThemeDark = dark;
       var s = document.createElement('script');
       s.setAttribute('src', 'https://utteranc.es/client.js');
-      s.setAttribute('repo', 'leeseven-li/leeseven-li.github.io.git');
+      s.setAttribute('repo', 'leeseven-li/leeseven-li.github.io');
       s.setAttribute('issue-term', 'pathname');
       
       s.setAttribute('label', 'utterances');
@@ -464,8 +463,6 @@
   
 
 
-
-  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
 
 
 
