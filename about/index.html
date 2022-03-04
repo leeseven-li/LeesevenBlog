@@ -16,19 +16,38 @@
   <meta name="author" content="leeseven-li">
   <meta name="keywords" content="">
   
-    <meta property="og:type" content="website">
-<meta property="og:title" content="大数据&#x2F;开源&#x2F;分享">
-<meta property="og:url" content="http://example.com/index.html">
+    <meta name="description" content="邮箱：&amp;#49;&amp;#x37;&amp;#x38;&amp;#x32;&amp;#49;&amp;#51;&amp;#53;&amp;#53;&amp;#x37;&amp;#x40;&amp;#113;&amp;#113;&amp;#x2e;&amp;#x63;&amp;#x6f;&amp;#x6d;有任何问题也可以添加微信：15731131718（添加微信请备注我的博客名）">
+<meta property="og:type" content="website">
+<meta property="og:title" content="about">
+<meta property="og:url" content="http://example.com/about/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
+<meta property="og:description" content="邮箱：&amp;#49;&amp;#x37;&amp;#x38;&amp;#x32;&amp;#49;&amp;#51;&amp;#53;&amp;#53;&amp;#x37;&amp;#x40;&amp;#113;&amp;#113;&amp;#x2e;&amp;#x63;&amp;#x6f;&amp;#x6d;有任何问题也可以添加微信：15731131718（添加微信请备注我的博客名）">
 <meta property="og:locale">
+<meta property="article:published_time" content="2022-03-04T09:33:53.000Z">
+<meta property="article:modified_time" content="2022-03-04T09:37:13.924Z">
 <meta property="article:author" content="leeseven-li">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>大数据/开源/分享</title>
+  <title>about - 大数据/开源/分享</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
@@ -55,7 +74,7 @@
 
 
 <body>
-  <header style="height: 100vh;">
+  <header style="height: 60vh;">
     <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
@@ -156,17 +175,13 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="天下难事，必做于易；天下大事，必做于细">
+            <span class="h2" id="subtitle" title="about">
               
             </span>
 
             
           </div>
 
-          
-            <div class="scroll-down-bar">
-              <i class="iconfont icon-arrowdown"></i>
-            </div>
           
         </div>
       </div>
@@ -177,189 +192,19 @@
     
       <div class="container nopadding-x-md">
         <div class="py-5" id="board"
-          style=margin-top:0>
+          >
           
           <div class="container">
             <div class="row">
               <div class="col-12 col-md-10 m-auto">
                 
 
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2022/03/04/hivesql%E4%BC%98%E5%8C%96/" target="_self">
-          hivesql优化
-        </a>
-      </h1>
-
-      <p class="index-excerpt">
-        <a href="/2022/03/04/hivesql%E4%BC%98%E5%8C%96/" target="_self">
-          
-          如何写好一个hql&amp;emsp;&amp;emsp;作为一个数据开发工程师，hive sql是我们必备的技能，可能大家都知道一些基本的优化方法（例如：使用分区、小表join大表、不使用distinct、where条件尽量写到自查询里面减少数据量等等），但是你有没有想过为什么？是不是真的对执行效率有提升。 &amp;emsp;&amp;emsp;下面为大家介绍一下hive的优化器以及一些常见的
-        </a>
-      </p>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2022-03-04 17:28" pubdate>
-              2022-03-04
-            </time>
-          </div>
-        
-        
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2022/03/02/hive-mapjoin%E6%8E%A2%E7%B4%A2/" target="_self">
-          hive-mapjoin探索
-        </a>
-      </h1>
-
-      <p class="index-excerpt">
-        <a href="/2022/03/02/hive-mapjoin%E6%8E%A2%E7%B4%A2/" target="_self">
-          
-          让你真正了解mapjoin参数首先创建好small_table和big_table俩个表。直接给俩个表执行join。 1234set hive.cbo.enable&#x3D;false;set hive.auto.convert.join&#x3D;false; set hive.auto.convert.join.noconditionaltask&#x3D;false; explain select t1.* from
-        </a>
-      </p>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2022-03-02 17:32" pubdate>
-              2022-03-02
-            </time>
-          </div>
-        
-        
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2022/03/02/parquet-md/" target="_self">
-          parquet.md
-        </a>
-      </h1>
-
-      <p class="index-excerpt">
-        <a href="/2022/03/02/parquet-md/" target="_self">
-          
-          PARQUET优势12341、更高的压缩比可以减少磁盘的使用2、更少的IO操作使用映射下推和谓词下推，可以读取需要的列，过滤掉不需要的列，减少不必要的数据扫描，尤其对于表字段比较多的时候优势明显。&gt; 映射下推：列式存储最突出的优势，数据扫描的时候，只需要扫描需要的列，避免全表扫描&gt; 谓词下推：将过滤条件在最底层执行减少结果集  如何提升parquet的查询性能121、对需要频繁过滤的列
-        </a>
-      </p>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2022-03-02 17:28" pubdate>
-              2022-03-02
-            </time>
-          </div>
-        
-        
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2022/03/02/orc-md/" target="_self">
-          orc.md
-        </a>
-      </h1>
-
-      <p class="index-excerpt">
-        <a href="/2022/03/02/orc-md/" target="_self">
-          
-          ORC(Optimized Record Columnar)orc支持哪些数据类型12345678910111213141516整数  boolean：1bit  tinyint：8bit  smallint：16bit  int：32bit  bigint：64bit浮点  float、double字符串  string、char、varchar字节  binary blobs日期&#x2F;时间  ti
-        </a>
-      </p>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2022-03-02 17:25" pubdate>
-              2022-03-02
-            </time>
-          </div>
-        
-        
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2022/02/09/orc-vs-parquet-md/" target="_self">
-          orc和parquet
-        </a>
-      </h1>
-
-      <p class="index-excerpt">
-        <a href="/2022/02/09/orc-vs-parquet-md/" target="_self">
-          
-          orc vs parquetorc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。 列式存储的优势列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不
-        </a>
-      </p>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2022-02-09 17:39" pubdate>
-              2022-02-09
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E5%88%97%E5%BC%8F%E5%AD%98%E5%82%A8/">列式存储</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
+<article class="page-content">
+  <p>邮箱：<a href="mailto:&#49;&#x37;&#x38;&#x32;&#49;&#51;&#53;&#53;&#x37;&#x40;&#113;&#113;&#x2e;&#x63;&#x6f;&#x6d;">&#49;&#x37;&#x38;&#x32;&#49;&#51;&#53;&#53;&#x37;&#x40;&#113;&#113;&#x2e;&#x63;&#x6f;&#x6d;</a><br>有任何问题也可以添加微信：15731131718（添加微信请备注我的博客名）</p>
 
 
-
-
+  
+</article>
 
               </div>
             </div>
@@ -472,6 +317,19 @@
   
 
 
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
 
