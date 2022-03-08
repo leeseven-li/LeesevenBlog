@@ -23,16 +23,10 @@
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
 <meta property="og:description" content="如何写好一个hql  作为一个数据开发工程师，hive sql是我们必备的技能，可能大家都知道一些基本的优化方法（例如：使用分区、小表join大表、不使用distinct、where条件尽量写到自查询里面减少数据量等等），但是你有没有想过为什么？是不是真的对执行效率有提升。   下面为大家介绍一下hive的优化器以及一些常见的sql技巧。 常见的优化器  如果你想查看hive的优化器，可以从git">
 <meta property="og:locale">
-<meta property="og:image" content="https://imgkr2.cn-bj.ufileos.com/4204e83a-ac8b-4f06-89c1-a6d83eb607ab.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=gvJf8bmzD2t1dyuo4%252BLiYY9%252Fe0A%253D&Expires=1603780357">
-<meta property="og:image" content="https://imgkr2.cn-bj.ufileos.com/962b5bcd-4542-4034-88b0-f6c51c04fe38.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=1%252BLKX1ieElTacJ5DUyecho5ahYo%253D&Expires=1603780900">
-<meta property="og:image" content="https://imgkr2.cn-bj.ufileos.com/ccf26603-6bf7-41b0-9578-3f3a5bde46e5.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=6Cir%252FhykcrQsbXh1RqUK9FA7c7U%253D&Expires=1603780606">
-<meta property="og:image" content="https://imgkr2.cn-bj.ufileos.com/f04b86fb-644d-45a5-8362-b3d2d0b21be8.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=4uAl48Dw0X6og0gbrltsOb5cQJ0%253D&Expires=1603781123">
-<meta property="og:image" content="https://imgkr2.cn-bj.ufileos.com/8368bd2f-b78b-4c8c-b0e0-a426664e2a08.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=HR94ELNm5UZco8EtmUYz5jd%252B%252BmI%253D&Expires=1603781149">
 <meta property="article:published_time" content="2022-03-04T09:28:25.000Z">
-<meta property="article:modified_time" content="2022-03-08T01:12:18.056Z">
+<meta property="article:modified_time" content="2022-03-08T02:43:46.459Z">
 <meta property="article:author" content="leeseven-li">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://imgkr2.cn-bj.ufileos.com/4204e83a-ac8b-4f06-89c1-a6d83eb607ab.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=gvJf8bmzD2t1dyuo4%252BLiYY9%252Fe0A%253D&Expires=1603780357">
   
   
   <title>hivesql优化 - 大数据/开源/分享</title>
@@ -211,7 +205,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      46 分钟
+      45 分钟
     </span>
   
 
@@ -256,19 +250,18 @@
 <p>  Hive中与列裁剪优化相关的配置项是hive.optimize.cp，与分区裁剪优化相关的则是hive.optimize.pruner，默认都是true。在HiveSQL解析阶段对应的则是ColumnPruner逻辑优化器。</p>
 <h3 id="PDD-Predicate-Pushdown"><a href="#PDD-Predicate-Pushdown" class="headerlink" title="PDD(Predicate Pushdown)"></a>PDD(Predicate Pushdown)</h3><p>  谓词下推优化器，在许多数据库中都会使用到，简单说就是把后面的查询条件前置，以下面sql来讲：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <br>    a.<span class="hljs-operator">*</span>, b.<span class="hljs-operator">*</span> <br><span class="hljs-keyword">from</span> a <span class="hljs-keyword">join</span> b <br><span class="hljs-keyword">on</span>  (a.col1 <span class="hljs-operator">=</span> b.col1) <br><span class="hljs-keyword">where</span> a.col1 <span class="hljs-operator">&gt;</span> <span class="hljs-number">20</span> <span class="hljs-keyword">and</span> b.col2 <span class="hljs-operator">&gt;</span> <span class="hljs-number">40</span><br></code></pre></td></tr></table></figure>
-<p>  大部分人可能认为应该通过将 a.col1 &gt; 20 and b.col2 &gt; 40 放到a表和b表里做子查询，减少数据量输入，这样做没有任何问题，但是上面这种写法，通过谓词下推优化器可以实现在读取a表和b表的同时将不符合条件的数据过滤掉。所以有时候不需要通过写自查询减少数据量输入，上面这种语法更加干净整洁。<br><img src="https://imgkr2.cn-bj.ufileos.com/4204e83a-ac8b-4f06-89c1-a6d83eb607ab.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=gvJf8bmzD2t1dyuo4%252BLiYY9%252Fe0A%253D&Expires=1603780357" srcset="/img/loading.gif" lazyload></p>
+<p>  大部分人可能认为应该通过将 a.col1 &gt; 20 and b.col2 &gt; 40 放到a表和b表里做子查询，减少数据量输入，这样做没有任何问题，但是上面这种写法，通过谓词下推优化器可以实现在读取a表和b表的同时将不符合条件的数据过滤掉。所以有时候不需要通过写自查询减少数据量输入，上面这种语法更加干净整洁。</p>
 <h3 id="mapjoin"><a href="#mapjoin" class="headerlink" title="mapjoin"></a>mapjoin</h3><blockquote>
 <p>Map joins have restrictions on which joins can be converted  as memory restrictions</p>
 </blockquote>
-<p>  简单来说map join就是把小表加入到内存中，直接把相同的key进行join处理，减少shuffle过程，可以极大提高工作效率，适用于码表或者一些大表和小表join的情况。下面是执行流程图：   </p>
-<p><img src="https://imgkr2.cn-bj.ufileos.com/962b5bcd-4542-4034-88b0-f6c51c04fe38.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=1%252BLKX1ieElTacJ5DUyecho5ahYo%253D&Expires=1603780900" srcset="/img/loading.gif" lazyload></p>
+<p>  简单来说map join就是把小表加入到内存中，直接把相同的key进行join处理，减少shuffle过程，可以极大提高工作效率，适用于码表或者一些大表和小表join的情况。下面是执行流程图：</p>
 <p>  1.先启动Task A；Task A启动一个MapReduce的local task；通过该local task把small table data的数据读取进来；之后会生成一个HashTable Files；之后将该文件加载到分布式缓存中；  </p>
 <p>  2.启动MapJoin Task，读大表的数据，每读一个就会和Distributed Cache中的数据关联一次，关联上后进行输出，整个阶段中没有reduce 和 shuffle。   </p>
-<h3 id="SkewJoinOptimizer"><a href="#SkewJoinOptimizer" class="headerlink" title="SkewJoinOptimizer"></a>SkewJoinOptimizer</h3><p>  数据倾斜优化器：主要应用在发生倾斜的任务中。数据倾斜的情况相信大家也经常遇到，如mapreduce任务进度长时间等待在99%或者一些内存溢出的情况等。产生数据倾斜的原因有很多种，倾斜的原理是很多相同的key用同一个reduce处理，导致处理的任务过大，如共有200亿数据，有100亿为男生 100亿为女生，如图只有两个reduce处理数据：<br><img src="https://imgkr2.cn-bj.ufileos.com/ccf26603-6bf7-41b0-9578-3f3a5bde46e5.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=6Cir%252FhykcrQsbXh1RqUK9FA7c7U%253D&Expires=1603780606" srcset="/img/loading.gif" lazyload><br>上述情况发生了数据倾斜，两个reduce承受了所有的压力，不会有第三个reduce处理数据。   </p>
+<h3 id="SkewJoinOptimizer"><a href="#SkewJoinOptimizer" class="headerlink" title="SkewJoinOptimizer"></a>SkewJoinOptimizer</h3><p>  数据倾斜优化器：主要应用在发生倾斜的任务中。数据倾斜的情况相信大家也经常遇到，如mapreduce任务进度长时间等待在99%或者一些内存溢出的情况等。产生数据倾斜的原因有很多种，倾斜的原理是很多相同的key用同一个reduce处理，导致处理的任务过大，如共有200亿数据，有100亿为男生 100亿为女生</p>
+<p>上述情况发生了数据倾斜，两个reduce承受了所有的压力，不会有第三个reduce处理数据。   </p>
 <p>  hive倾斜的优化器把一个shuffle拆分成两个shuffle过程： </p>
-<p>1、第一个shuffle过程：给key增加一个随机数，因此生成的hash值也不尽相同，相同的随机数+相同的原key生成的hash值依然一样，如此数据就会放到一起；   </p>
-<p><img src="https://imgkr2.cn-bj.ufileos.com/f04b86fb-644d-45a5-8362-b3d2d0b21be8.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=4uAl48Dw0X6og0gbrltsOb5cQJ0%253D&Expires=1603781123" srcset="/img/loading.gif" lazyload></p>
-<p>2、第二个shuffle过程：将前边的随机数去掉，重新聚合可以得到想要的结果。<br>   <img src="https://imgkr2.cn-bj.ufileos.com/8368bd2f-b78b-4c8c-b0e0-a426664e2a08.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=HR94ELNm5UZco8EtmUYz5jd%252B%252BmI%253D&Expires=1603781149" srcset="/img/loading.gif" lazyload></p>
+<p>1、第一个shuffle过程：给key增加一个随机数，因此生成的hash值也不尽相同，相同的随机数+相同的原key生成的hash值依然一样，如此数据就会放到一起；</p>
+<p>2、第二个shuffle过程：将前边的随机数去掉，重新聚合可以得到想要的结果。</p>
 <blockquote>
 <p>通过分批处理解决数据倾斜问题的方案也是在spark等其他大数据计算引擎中通用且有效的方法。</p>
 </blockquote>
