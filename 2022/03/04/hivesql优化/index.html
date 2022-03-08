@@ -16,12 +16,12 @@
   <meta name="author" content="leeseven-li">
   <meta name="keywords" content="">
   
-    <meta name="description" content="如何写好一个hql&amp;emsp;&amp;emsp;作为一个数据开发工程师，hive sql是我们必备的技能，可能大家都知道一些基本的优化方法（例如：使用分区、小表join大表、不使用distinct、where条件尽量写到自查询里面减少数据量等等），但是你有没有想过为什么？是不是真的对执行效率有提升。 &amp;emsp;&amp;emsp;下面为大家介绍一下hive的优化器以及一些常见的">
+    <meta name="description" content="如何写好一个hql  作为一个数据开发工程师，hive sql是我们必备的技能，可能大家都知道一些基本的优化方法（例如：使用分区、小表join大表、不使用distinct、where条件尽量写到自查询里面减少数据量等等），但是你有没有想过为什么？是不是真的对执行效率有提升。   下面为大家介绍一下hive的优化器以及一些常见的sql技巧。 常见的优化器  如果你想查看hive的优化器，可以从git">
 <meta property="og:type" content="article">
 <meta property="og:title" content="hivesql优化">
 <meta property="og:url" content="http://example.com/2022/03/04/hivesql%E4%BC%98%E5%8C%96/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
-<meta property="og:description" content="如何写好一个hql&amp;emsp;&amp;emsp;作为一个数据开发工程师，hive sql是我们必备的技能，可能大家都知道一些基本的优化方法（例如：使用分区、小表join大表、不使用distinct、where条件尽量写到自查询里面减少数据量等等），但是你有没有想过为什么？是不是真的对执行效率有提升。 &amp;emsp;&amp;emsp;下面为大家介绍一下hive的优化器以及一些常见的">
+<meta property="og:description" content="如何写好一个hql  作为一个数据开发工程师，hive sql是我们必备的技能，可能大家都知道一些基本的优化方法（例如：使用分区、小表join大表、不使用distinct、where条件尽量写到自查询里面减少数据量等等），但是你有没有想过为什么？是不是真的对执行效率有提升。   下面为大家介绍一下hive的优化器以及一些常见的sql技巧。 常见的优化器  如果你想查看hive的优化器，可以从git">
 <meta property="og:locale">
 <meta property="og:image" content="https://imgkr2.cn-bj.ufileos.com/4204e83a-ac8b-4f06-89c1-a6d83eb607ab.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=gvJf8bmzD2t1dyuo4%252BLiYY9%252Fe0A%253D&Expires=1603780357">
 <meta property="og:image" content="https://imgkr2.cn-bj.ufileos.com/962b5bcd-4542-4034-88b0-f6c51c04fe38.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=1%252BLKX1ieElTacJ5DUyecho5ahYo%253D&Expires=1603780900">
@@ -29,7 +29,7 @@
 <meta property="og:image" content="https://imgkr2.cn-bj.ufileos.com/f04b86fb-644d-45a5-8362-b3d2d0b21be8.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=4uAl48Dw0X6og0gbrltsOb5cQJ0%253D&Expires=1603781123">
 <meta property="og:image" content="https://imgkr2.cn-bj.ufileos.com/8368bd2f-b78b-4c8c-b0e0-a426664e2a08.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=HR94ELNm5UZco8EtmUYz5jd%252B%252BmI%253D&Expires=1603781149">
 <meta property="article:published_time" content="2022-03-04T09:28:25.000Z">
-<meta property="article:modified_time" content="2022-03-04T09:28:57.302Z">
+<meta property="article:modified_time" content="2022-03-08T01:12:18.056Z">
 <meta property="article:author" content="leeseven-li">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://imgkr2.cn-bj.ufileos.com/4204e83a-ac8b-4f06-89c1-a6d83eb607ab.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=gvJf8bmzD2t1dyuo4%252BLiYY9%252Fe0A%253D&Expires=1603780357">
@@ -202,7 +202,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      6k 字
+      5.4k 字
     </span>
   
 
@@ -211,7 +211,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      51 分钟
+      46 分钟
     </span>
   
 
@@ -251,75 +251,75 @@
             <h1 style="display: none">hivesql优化</h1>
             
             <div class="markdown-body">
-              <h1 id="如何写好一个hql"><a href="#如何写好一个hql" class="headerlink" title="如何写好一个hql"></a>如何写好一个hql</h1><p>&amp;emsp;&amp;emsp;作为一个数据开发工程师，hive sql是我们必备的技能，可能大家都知道一些基本的优化方法（例如：使用分区、小表join大表、不使用distinct、where条件尽量写到自查询里面减少数据量等等），<br>但是你有没有想过为什么？是不是真的对执行效率有提升。</p>
-<p>&amp;emsp;&amp;emsp;下面为大家介绍一下hive的优化器以及一些常见的sql技巧。</p>
-<h2 id="常见的优化器"><a href="#常见的优化器" class="headerlink" title="常见的优化器"></a>常见的优化器</h2><p>&amp;emsp;&amp;emsp;如果你想查看hive的优化器，可以从github上面拉一份hive的源码，在org.apache.hadoop.hive.ql.optimizer目录下可以看到hive里面有哪些逻辑优化器。 </p>
-<p>下面介绍一些常见多优化器:</p>
+              <h1 id="如何写好一个hql"><a href="#如何写好一个hql" class="headerlink" title="如何写好一个hql"></a>如何写好一个hql</h1><p>  作为一个数据开发工程师，hive sql是我们必备的技能，可能大家都知道一些基本的优化方法（例如：使用分区、小表join大表、不使用distinct、where条件尽量写到自查询里面减少数据量等等），但是你有没有想过为什么？是不是真的对执行效率有提升。</p>
+<p>  下面为大家介绍一下hive的优化器以及一些常见的sql技巧。</p>
+<h2 id="常见的优化器"><a href="#常见的优化器" class="headerlink" title="常见的优化器"></a>常见的优化器</h2><p>  如果你想查看hive的优化器，可以从github上面拉一份hive的源码，在org.apache.hadoop.hive.ql.optimizer目录下可以看到hive里面有哪些逻辑优化器。 </p>
 <h3 id="列裁剪优化器"><a href="#列裁剪优化器" class="headerlink" title="列裁剪优化器"></a>列裁剪优化器</h3><p>官方解释    </p>
 <blockquote>
 <p>Implementation of one of the rule-based optimization steps. ColumnPruner gets<br>the current operator tree. The  tree is traversed to find out the columns<br>used for all the base tables. If all the columns for a table are not used, a<br>select is pushed on top of that table (to select only those columns). Since<br>this changes the row resolver, the tree is built again. This can be optimized<br>later to patch the tree</p>
 </blockquote>
-<p>&amp;emsp;&amp;emsp;我们sql中都会用到列裁剪。所谓列裁剪就是在查询时只读取需要的列，分区裁剪就是只读取需要的分区。以我们的日历记录表为例：</p>
+<p>  我们sql中都会用到列裁剪。所谓列裁剪就是在查询时只读取需要的列，分区裁剪就是只读取需要的分区。以我们的日历记录表为例：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> uid,uname,sex<br><span class="hljs-keyword">from</span> user_info<br><span class="hljs-keyword">where</span> dt <span class="hljs-operator">&gt;=</span> <span class="hljs-string">&#x27;20190201&#x27;</span> <span class="hljs-keyword">and</span> dt <span class="hljs-operator">&lt;=</span> <span class="hljs-string">&#x27;20190224&#x27;</span><br><span class="hljs-keyword">and</span> age <span class="hljs-operator">=</span> <span class="hljs-number">18</span>;<br></code></pre></td></tr></table></figure>
-<p>&amp;emsp;&amp;emsp;当列很多或者数据量很大时，如果select * 或者不指定分区，全列扫描和全表扫描效率都很低。</p>
-<p>&amp;emsp;&amp;emsp;Hive中与列裁剪优化相关的配置项是hive.optimize.cp，与分区裁剪优化相关的则是hive.optimize.pruner，默认都是true。在HiveSQL解析阶段对应的则是ColumnPruner逻辑优化器。</p>
-<h3 id="PDD-Predicate-Pushdown"><a href="#PDD-Predicate-Pushdown" class="headerlink" title="PDD(Predicate Pushdown)"></a>PDD(Predicate Pushdown)</h3><p>&amp;emsp;&amp;emsp;谓词下推优化器，在许多数据库中都会使用到，简单说就是把后面的查询条件前置，以下面sql来讲：</p>
+<p>  当列很多或者数据量很大时，如果select * 或者不指定分区，全列扫描和全表扫描效率都很低。</p>
+<p>  Hive中与列裁剪优化相关的配置项是hive.optimize.cp，与分区裁剪优化相关的则是hive.optimize.pruner，默认都是true。在HiveSQL解析阶段对应的则是ColumnPruner逻辑优化器。</p>
+<h3 id="PDD-Predicate-Pushdown"><a href="#PDD-Predicate-Pushdown" class="headerlink" title="PDD(Predicate Pushdown)"></a>PDD(Predicate Pushdown)</h3><p>  谓词下推优化器，在许多数据库中都会使用到，简单说就是把后面的查询条件前置，以下面sql来讲：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <br>    a.<span class="hljs-operator">*</span>, b.<span class="hljs-operator">*</span> <br><span class="hljs-keyword">from</span> a <span class="hljs-keyword">join</span> b <br><span class="hljs-keyword">on</span>  (a.col1 <span class="hljs-operator">=</span> b.col1) <br><span class="hljs-keyword">where</span> a.col1 <span class="hljs-operator">&gt;</span> <span class="hljs-number">20</span> <span class="hljs-keyword">and</span> b.col2 <span class="hljs-operator">&gt;</span> <span class="hljs-number">40</span><br></code></pre></td></tr></table></figure>
-<p>&amp;emsp;&amp;emsp;大部分人可能认为应该通过将 a.col1 &gt; 20 and b.col2 &gt; 40 放到a表和b表里做子查询，减少数据量输入，这样做没有任何问题，但是上面这种写法，通过谓词下推优化器可以实现在读取a表和b表的同时将不符合条件的数据过滤掉。所以有时候不需要通过写自查询减少数据量输入，上面这种语法更加干净整洁。<br><img src="https://imgkr2.cn-bj.ufileos.com/4204e83a-ac8b-4f06-89c1-a6d83eb607ab.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=gvJf8bmzD2t1dyuo4%252BLiYY9%252Fe0A%253D&Expires=1603780357" srcset="/img/loading.gif" lazyload></p>
+<p>  大部分人可能认为应该通过将 a.col1 &gt; 20 and b.col2 &gt; 40 放到a表和b表里做子查询，减少数据量输入，这样做没有任何问题，但是上面这种写法，通过谓词下推优化器可以实现在读取a表和b表的同时将不符合条件的数据过滤掉。所以有时候不需要通过写自查询减少数据量输入，上面这种语法更加干净整洁。<br><img src="https://imgkr2.cn-bj.ufileos.com/4204e83a-ac8b-4f06-89c1-a6d83eb607ab.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=gvJf8bmzD2t1dyuo4%252BLiYY9%252Fe0A%253D&Expires=1603780357" srcset="/img/loading.gif" lazyload></p>
 <h3 id="mapjoin"><a href="#mapjoin" class="headerlink" title="mapjoin"></a>mapjoin</h3><blockquote>
 <p>Map joins have restrictions on which joins can be converted  as memory restrictions</p>
 </blockquote>
-<p>&amp;emsp;&amp;emsp;简单来说map join就是把小表加入到内存中，直接把相同的key进行join处理，减少shuffle过程，可以极大提高工作效率，适用于码表或者一些大表和小表join的情况。<br>下面是执行流程图：   </p>
+<p>  简单来说map join就是把小表加入到内存中，直接把相同的key进行join处理，减少shuffle过程，可以极大提高工作效率，适用于码表或者一些大表和小表join的情况。下面是执行流程图：   </p>
 <p><img src="https://imgkr2.cn-bj.ufileos.com/962b5bcd-4542-4034-88b0-f6c51c04fe38.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=1%252BLKX1ieElTacJ5DUyecho5ahYo%253D&Expires=1603780900" srcset="/img/loading.gif" lazyload></p>
-<p>&amp;emsp;&amp;emsp;1.先启动Task A；Task A启动一个MapReduce的local task；通过该local task把small table data的数据读取进来；之后会生成一个HashTable Files；之后将该文件加载到分布式缓存中；  </p>
-<p>&amp;emsp;&amp;emsp;2.启动MapJoin Task，读大表的数据，每读一个就会和Distributed Cache中的数据关联一次，关联上后进行输出，整个阶段中没有reduce 和 shuffle。   </p>
-<h3 id="SkewJoinOptimizer"><a href="#SkewJoinOptimizer" class="headerlink" title="SkewJoinOptimizer"></a>SkewJoinOptimizer</h3><p>&amp;emsp;&amp;emsp;数据倾斜优化器：主要应用在发生倾斜的任务中。数据倾斜的情况相信大家也经常遇到，如mapreduce任务进度长时间等待在99%或者一些内存溢出的情况等。产生数据倾斜的原因<br>有很多种，倾斜的原理是很多相同的key用同一个reduce处理，导致处理的任务过大，如共有200亿数据，有100亿为男生 100亿为女生，如图只有两个reduce处理数据：<br><img src="https://imgkr2.cn-bj.ufileos.com/ccf26603-6bf7-41b0-9578-3f3a5bde46e5.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=6Cir%252FhykcrQsbXh1RqUK9FA7c7U%253D&Expires=1603780606" srcset="/img/loading.gif" lazyload><br>上述情况发生了数据倾斜，两个reduce承受了所有的压力，不会有第三个reduce处理数据。   </p>
-<p>&amp;emsp;&amp;emsp;hive倾斜的优化器把一个shuffle拆分成两个shuffle过程：<br>   &amp;emsp;&amp;emsp;1、第一个shuffle过程：给key增加一个随机数，因此生成的hash值也不尽相同，相同的随机数+相同的原key生成的hash值依然一样，如此数据就会放到一起；   </p>
+<p>  1.先启动Task A；Task A启动一个MapReduce的local task；通过该local task把small table data的数据读取进来；之后会生成一个HashTable Files；之后将该文件加载到分布式缓存中；  </p>
+<p>  2.启动MapJoin Task，读大表的数据，每读一个就会和Distributed Cache中的数据关联一次，关联上后进行输出，整个阶段中没有reduce 和 shuffle。   </p>
+<h3 id="SkewJoinOptimizer"><a href="#SkewJoinOptimizer" class="headerlink" title="SkewJoinOptimizer"></a>SkewJoinOptimizer</h3><p>  数据倾斜优化器：主要应用在发生倾斜的任务中。数据倾斜的情况相信大家也经常遇到，如mapreduce任务进度长时间等待在99%或者一些内存溢出的情况等。产生数据倾斜的原因有很多种，倾斜的原理是很多相同的key用同一个reduce处理，导致处理的任务过大，如共有200亿数据，有100亿为男生 100亿为女生，如图只有两个reduce处理数据：<br><img src="https://imgkr2.cn-bj.ufileos.com/ccf26603-6bf7-41b0-9578-3f3a5bde46e5.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=6Cir%252FhykcrQsbXh1RqUK9FA7c7U%253D&Expires=1603780606" srcset="/img/loading.gif" lazyload><br>上述情况发生了数据倾斜，两个reduce承受了所有的压力，不会有第三个reduce处理数据。   </p>
+<p>  hive倾斜的优化器把一个shuffle拆分成两个shuffle过程： </p>
+<p>1、第一个shuffle过程：给key增加一个随机数，因此生成的hash值也不尽相同，相同的随机数+相同的原key生成的hash值依然一样，如此数据就会放到一起；   </p>
 <p><img src="https://imgkr2.cn-bj.ufileos.com/f04b86fb-644d-45a5-8362-b3d2d0b21be8.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=4uAl48Dw0X6og0gbrltsOb5cQJ0%253D&Expires=1603781123" srcset="/img/loading.gif" lazyload></p>
-<p>   &amp;emsp;&amp;emsp;2、第二个shuffle过程：将前边的随机数去掉，重新聚合可以得到想要的结果。<br>   <img src="https://imgkr2.cn-bj.ufileos.com/8368bd2f-b78b-4c8c-b0e0-a426664e2a08.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=HR94ELNm5UZco8EtmUYz5jd%252B%252BmI%253D&Expires=1603781149" srcset="/img/loading.gif" lazyload></p>
+<p>2、第二个shuffle过程：将前边的随机数去掉，重新聚合可以得到想要的结果。<br>   <img src="https://imgkr2.cn-bj.ufileos.com/8368bd2f-b78b-4c8c-b0e0-a426664e2a08.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=HR94ELNm5UZco8EtmUYz5jd%252B%252BmI%253D&Expires=1603781149" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>通过分批处理解决数据倾斜问题的方案也是在spark等其他大数据计算引擎中通用且有效的方法。</p>
 </blockquote>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>&amp;emsp;&amp;emsp;hive的优化器其实很多，通过学习hive优化器的原理，让我们可以写出效率更高的sql，如果有兴趣的话可以从github下载hive源码去学习更多优化器的详细内容。</p>
-<h2 id="hql语法进阶与常用小技巧"><a href="#hql语法进阶与常用小技巧" class="headerlink" title="hql语法进阶与常用小技巧"></a>hql语法进阶与常用小技巧</h2><h3 id="CTE查询"><a href="#CTE查询" class="headerlink" title="CTE查询"></a>CTE查询</h3><p>&amp;emsp;&amp;emsp;通过as将查询语句作为一个临时存储表给后边的查询使用，可以使你的sql更加灵活简洁。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>  hive的优化器其实很多，通过学习hive优化器的原理，让我们可以写出效率更高的sql，如果有兴趣的话可以从github下载hive源码去学习更多优化器的详细内容。</p>
+<h2 id="hql语法进阶与常用小技巧"><a href="#hql语法进阶与常用小技巧" class="headerlink" title="hql语法进阶与常用小技巧"></a>hql语法进阶与常用小技巧</h2><h3 id="CTE查询"><a href="#CTE查询" class="headerlink" title="CTE查询"></a>CTE查询</h3><p>  通过as将查询语句作为一个临时存储表给后边的查询使用，可以使你的sql更加灵活简洁。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">WITH <br>t1 as (select * from t1 where name = &#x27;1&#x27;),<br>t2 as (select * from t2 where name = &#x27;2&#x27;)<br>select * from t1 join t2 on t1.id = t2.id<br></code></pre></td></tr></table></figure>
-<h3 id="列匹配正则表达式"><a href="#列匹配正则表达式" class="headerlink" title="列匹配正则表达式"></a>列匹配正则表达式</h3><p>&amp;emsp;&amp;emsp;一个表一千多个列痛苦不痛苦？通过设置  SET hive.support.quoted.identifiers &#x3D; none；可以输出正则匹配到的列并排除一些不需要的列。</p>
+<h3 id="列匹配正则表达式"><a href="#列匹配正则表达式" class="headerlink" title="列匹配正则表达式"></a>列匹配正则表达式</h3><p>  一个表一千多个列痛苦不痛苦？通过设置  SET hive.support.quoted.identifiers &#x3D; none；可以输出正则匹配到的列并排除一些不需要的列。</p>
 <figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs n1ql"><span class="hljs-keyword">SELECT</span> <span class="hljs-symbol">`^o.*`</span> <span class="hljs-keyword">from</span> table_name;<br></code></pre></td></tr></table></figure>
-<h3 id="多表插入"><a href="#多表插入" class="headerlink" title="多表插入"></a>多表插入</h3><p>&amp;emsp;&amp;emsp;有时候我们会遇到不同的查询条件或者需要将一个大表中的数据拆分到不同的数据表中，如果每个数据表写一个sql会造成资源浪费效率也比较低，<br>这时候from语法就来了，如下</p>
+<h3 id="多表插入"><a href="#多表插入" class="headerlink" title="多表插入"></a>多表插入</h3><p>  有时候我们会遇到不同的查询条件或者需要将一个大表中的数据拆分到不同的数据表中，如果每个数据表写一个sql会造成资源浪费效率也比较低，<br>这时候from语法就来了，如下</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">from table_name<br>insert overwrite table table1 where id &gt; 100<br>insert overwrite table table2 where name = &#x27;lee&#x27;<br></code></pre></td></tr></table></figure>
 <blockquote>
 <p>可以一次读取table_name表数据插入不同表中</p>
 </blockquote>
-<h3 id="cube-rollup"><a href="#cube-rollup" class="headerlink" title="cube rollup"></a>cube rollup</h3><p>&amp;emsp;&amp;emsp;很多时候我们除了需要在报表中罗列出每个具体项的数据，还需要进行汇总，并且是不同维度的汇总。如果在展示表格的时候汇总，可能会比较慢，我们一般是把结果计算出来之后，以’ALL’或者’总计’,’汇总’等字样作为项的名称，然后放入汇总值。如果仅仅是所有行的汇总，一次聚合就搞定。但是不同维度的汇总就会很麻烦,这时候就轮到cube rollup出场了。</p>
-<h4 id="cube函数"><a href="#cube函数" class="headerlink" title="cube函数"></a>cube函数</h4><p>&amp;emsp;&amp;emsp;cube(a,b,c)则首先会对(a,b,c)进行group by，然后依次是(a,b),(a,c),(a),(b,c),(b),(c),最后在对全表进行group by，他会统计所选列中值的所有组合的聚合，用cube函数就可以完成所有维度的聚合工作。</p>
+<h3 id="cube-rollup"><a href="#cube-rollup" class="headerlink" title="cube rollup"></a>cube rollup</h3><p>  很多时候我们除了需要在报表中罗列出每个具体项的数据，还需要进行汇总，并且是不同维度的汇总。如果在展示表格的时候汇总，可能会比较慢，我们一般是把结果计算出来之后，以’ALL’或者’总计’,’汇总’等字样作为项的名称，然后放入汇总值。如果仅仅是所有行的汇总，一次聚合就搞定。但是不同维度的汇总就会很麻烦,这时候就轮到cube rollup出场了。</p>
+<h4 id="cube函数"><a href="#cube函数" class="headerlink" title="cube函数"></a>cube函数</h4><p>  cube(a,b,c)则首先会对(a,b,c)进行group by，然后依次是(a,b),(a,c),(a),(b,c),(b),(c),最后在对全表进行group by，他会统计所选列中值的所有组合的聚合，用cube函数就可以完成所有维度的聚合工作。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">select a,b,c from table_name group by a,b,c with cube<br></code></pre></td></tr></table></figure>
 <blockquote>
 <p>如果我们想要手动实现cube函数需要把所有维度的聚合都用union all来汇总.<br>可以说cube函数方便了用户的使用.<br>但是我并不用知道所有维度的聚合,我就想要col1,(col2,col3)的怎么办?</p>
 </blockquote>
 <p>grouping sets</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">select a,b,c from table_name group by a,b,c grouping sets(a,(b,c)); <br></code></pre></td></tr></table></figure>
-<h4 id="rollup"><a href="#rollup" class="headerlink" title="rollup"></a>rollup</h4><p>&amp;emsp;&amp;emsp;rullup函数是cube的子集,以最左侧维度为主,按照顺序依次进行聚合.<br>例如聚合的维度为 col1,col2,col3 使用rollup聚合的字段分别为 col1,(col1,col2),(col1,col3),(col1,col2,col3)。    </p>
+<h4 id="rollup"><a href="#rollup" class="headerlink" title="rollup"></a>rollup</h4><p>  rullup函数是cube的子集,以最左侧维度为主,按照顺序依次进行聚合.<br>例如聚合的维度为 col1,col2,col3 使用rollup聚合的字段分别为 col1,(col1,col2),(col1,col3),(col1,col2,col3)。    </p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">select a,b,c from table_name group by a,b,c with rollup;<br></code></pre></td></tr></table></figure>
 
-<h3 id="行转列"><a href="#行转列" class="headerlink" title="行转列"></a>行转列</h3><p>&amp;emsp;&amp;emsp;提到行转列相信大家首先想到的是explode，配合lateral view可以实现一行变多行。</p>
+<h3 id="行转列"><a href="#行转列" class="headerlink" title="行转列"></a>行转列</h3><p>  提到行转列相信大家首先想到的是explode，配合lateral view可以实现一行变多行。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">select a, b, c from table_name t lateral view explode(t.e)  as c;<br>--可以配合split使用<br>select a, b, c from table_name t lateral view explode(split(t.e,&#x27;,&#x27;))  as c;<br>--可以配合json<br></code></pre></td></tr></table></figure>
-<p>&amp;emsp;&amp;emsp;另外lateral view 还可以配置json_tuple使用，抽取json的多个字段。</p>
+<p>  另外lateral view 还可以配置json_tuple使用，抽取json的多个字段。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">SELECT <br>    *<br>from<br>(select  *  from  table_name ) t1<br>lateral view json_tuple(json_field,&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;) state_json as a,b,c<br></code></pre></td></tr></table></figure>
 <blockquote>
 <p>这样会把json里面的三个value加载到已有字段后</p>
 </blockquote>
-<p>&amp;emsp;&amp;emsp;行转列对应hive里面的udtf，如果现有的函数满足不了你的需求，可以开发一个udtf来实现自定义的行转列操作。</p>
-<h3 id="列转行"><a href="#列转行" class="headerlink" title="列转行"></a>列转行</h3><p>&amp;emsp;&amp;emsp;多行变成一行，其实就是聚合操作，通过group by操作可以实现聚合操作，有时候我们需要把字段信息也保留下来，这时候就用到了collect_ws、collect_set。</p>
+<p>  行转列对应hive里面的udtf，如果现有的函数满足不了你的需求，可以开发一个udtf来实现自定义的行转列操作。</p>
+<h3 id="列转行"><a href="#列转行" class="headerlink" title="列转行"></a>列转行</h3><p>  多行变成一行，其实就是聚合操作，通过group by操作可以实现聚合操作，有时候我们需要把字段信息也保留下来，这时候就用到了collect_ws、collect_set。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">--根据a b 聚合，对c去重<br>select a,b,collect_set(c) from table_name group by a,b;<br>--根据a b 聚合，然后把c放到一个数据<br>select a,b,collect_list(c) from table_name group by a,b;<br>--根据a b 聚合，然后使用，拼接c字段<br>select a,b,concat_ws(&quot;,&quot;,collect_list(c)) from table_name group by a,b;<br></code></pre></td></tr></table></figure>
 
-<h3 id="窗口函数"><a href="#窗口函数" class="headerlink" title="窗口函数"></a>窗口函数</h3><p>&amp;emsp;&amp;emsp;窗口函数是用于分析的一类函数，要理解窗口函数要先从聚合函数说起。 大家都知道聚合函数是将某列中多行的值合并为一行，比如sum、count等。 而窗口函数则可以在本行内做运算，得到多行的结果，即每一行对应一行的值。 通用的窗口函数可以用下面的语法来概括：</p>
+<h3 id="窗口函数"><a href="#窗口函数" class="headerlink" title="窗口函数"></a>窗口函数</h3><p>  窗口函数是用于分析的一类函数，要理解窗口函数要先从聚合函数说起。 大家都知道聚合函数是将某列中多行的值合并为一行，比如sum、count等。而窗口函数则可以在本行内做运算，得到多行的结果，即每一行对应一行的值。 通用的窗口函数可以用下面的语法来概括：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">Function() Over (Partition By Column1,Column2,Order By Column3);<br></code></pre></td></tr></table></figure>
-<p>&amp;emsp;&amp;emsp;窗口函数分三类：聚合型窗口函数、分析型窗口函数、取值型窗口函数</p>
-<h4 id="聚合型"><a href="#聚合型" class="headerlink" title="聚合型"></a>聚合型</h4><p>&amp;emsp;&amp;emsp;聚合型即SUM(),MIN(),MAX(),AVG(),COUNT()这些常见的聚合函数。 聚合函数配合窗口函数使用可以使计算更加灵活。</p>
+<p>  窗口函数分三类：聚合型窗口函数、分析型窗口函数、取值型窗口函数</p>
+<h4 id="聚合型"><a href="#聚合型" class="headerlink" title="聚合型"></a>聚合型</h4><p>  聚合型即SUM(),MIN(),MAX(),AVG(),COUNT()这些常见的聚合函数。 聚合函数配合窗口函数使用可以使计算更加灵活。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">select *,sum/count/max/min/avg(file_name) over(partition by file_name order by field_name) from table_name<br></code></pre></td></tr></table></figure>
-<h4 id="分析型"><a href="#分析型" class="headerlink" title="分析型"></a>分析型</h4><p>&amp;emsp;&amp;emsp;分析型即RANk(),ROW_NUMBER(),DENSE_RANK()等常见的排序用的窗口函数，不过他们也是有区别的。</p>
+<h4 id="分析型"><a href="#分析型" class="headerlink" title="分析型"></a>分析型</h4><p>  分析型即RANk(),ROW_NUMBER(),DENSE_RANK()等常见的排序用的窗口函数，不过他们也是有区别的。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">select *,<br>--俩个元素相同会跳过下一个序列号<br>rank() over (order by create_time) as user_rank,<br>--生成连续的序列号<br>row_number() over (order by create_time) as user_row_number,<br>--俩个元素相同不会跳过下一个序列号<br>dense_rank() over (order by create_time) as user_dense_rank<br>from table_name<br></code></pre></td></tr></table></figure>
-<h4 id="取值型"><a href="#取值型" class="headerlink" title="取值型"></a>取值型</h4><p>&amp;emsp;&amp;emsp;这几个函数可以通过字面意思可知，LAG是迟滞的意思，用于统计窗口内往上第n行值；LEAD是LAG的反义词，用于统计窗口内往下第n行值；FIRST_VALUE是该列到目前为止的首个值，而LAST_VALUE是到目前行为止的最后一个值。</p>
+<h4 id="取值型"><a href="#取值型" class="headerlink" title="取值型"></a>取值型</h4><p>  这几个函数可以通过字面意思可知，LAG是迟滞的意思，用于统计窗口内往上第n行值；LEAD是LAG的反义词，用于统计窗口内往下第n行值；FIRST_VALUE是该列到目前为止的首个值，而LAST_VALUE是到目前行为止的最后一个值。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs hiveql">--以贷款为例<br>SELECT *,<br>--取上一笔贷款的日期,缺失默认填NULL<br>LAG(orderdate, 1) OVER(PARTITION BY name ORDER BY orderdate) AS last_dt,<br>--取下一笔贷款的日期,缺失指定填&#x27;1970-1-1&#x27;<br>LEAD(orderdate, 1,&#x27;1970-1-1&#x27;) OVER(PARTITION BY name ORDER BY orderdate) AS next_dt,<br>--去第一个的日期<br>FIRST_VALUE(orderdate) OVER(PARTITION BY name ORDER BY orderdate) AS first_dt,<br>--取最后一个日期<br>LAST_VALUE(orderdate) OVER(PARTITION BY name ORDER BY orderdate) AS latest_dt<br>from table_name<br></code></pre></td></tr></table></figure>
 
 <h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>本文主要分享了hive的优化器和SQL使用技巧。最后，不管你是SQL boy or  SQL girl，只要掌握一些技巧，相信都能够Happy SQL querying 😊。</p>
