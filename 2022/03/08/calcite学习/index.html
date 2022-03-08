@@ -16,21 +16,20 @@
   <meta name="author" content="leeseven-li">
   <meta name="keywords" content="">
   
-    <meta name="description" content="orc vs parquetorc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。 列式存储的优势列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不">
+    <meta name="description" content="calcite学习什么是calcite？123calcite是一个数据库动态管理系统，它提供了一个通用的sql解析、sql校验、sql优化、sql执行的数据库的能力。架构上面是一个灵活的、嵌入式的、可扩展的可以很方便的集成到其他大型项目中去。它的核心是一个关系代数（也是数据库的理论基础），把任何一个查询表示成由关系运算符组成的树。sql转换成关系代数之后，可以进行RBO以及CBO进行规划优化，在保">
 <meta property="og:type" content="article">
-<meta property="og:title" content="orc和parquet">
-<meta property="og:url" content="http://example.com/2022/02/09/orc-vs-parquet-md/index.html">
+<meta property="og:title" content="calcite学习">
+<meta property="og:url" content="http://example.com/2022/03/08/calcite%E5%AD%A6%E4%B9%A0/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
-<meta property="og:description" content="orc vs parquetorc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。 列式存储的优势列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不">
+<meta property="og:description" content="calcite学习什么是calcite？123calcite是一个数据库动态管理系统，它提供了一个通用的sql解析、sql校验、sql优化、sql执行的数据库的能力。架构上面是一个灵活的、嵌入式的、可扩展的可以很方便的集成到其他大型项目中去。它的核心是一个关系代数（也是数据库的理论基础），把任何一个查询表示成由关系运算符组成的树。sql转换成关系代数之后，可以进行RBO以及CBO进行规划优化，在保">
 <meta property="og:locale">
-<meta property="article:published_time" content="2022-02-09T09:39:17.000Z">
-<meta property="article:modified_time" content="2022-02-09T10:35:33.826Z">
+<meta property="article:published_time" content="2022-03-08T02:54:05.000Z">
+<meta property="article:modified_time" content="2022-03-08T02:57:03.102Z">
 <meta property="article:author" content="leeseven-li">
-<meta property="article:tag" content="列式存储">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>orc和parquet - 大数据/开源/分享</title>
+  <title>calcite学习 - 大数据/开源/分享</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -176,7 +175,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="orc和parquet">
+            <span class="h2" id="subtitle" title="calcite学习">
               
             </span>
 
@@ -186,8 +185,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2022-02-09 17:39" pubdate>
-        February 9, 2022 pm
+      <time datetime="2022-03-08 10:54" pubdate>
+        March 8, 2022 am
       </time>
     </span>
   
@@ -197,7 +196,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.4k 字
+      1.8k 字
     </span>
   
 
@@ -206,7 +205,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      12 分钟
+      15 分钟
     </span>
   
 
@@ -235,27 +234,28 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">orc和parquet</h1>
+            <h1 style="display: none">calcite学习</h1>
             
             <div class="markdown-body">
-              <h1 id="orc-vs-parquet"><a href="#orc-vs-parquet" class="headerlink" title="orc vs parquet"></a>orc vs parquet</h1><p>orc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。</p>
-<h2 id="列式存储的优势"><a href="#列式存储的优势" class="headerlink" title="列式存储的优势"></a>列式存储的优势</h2><p>列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不需要的列，其实也是我们在hive、spark等olap等引擎中最常用的优化手段，通过只读取我们需要的列，可以很大程度上面减少io提高我们分析的性能。其次就是通过列式存储，我们可以对列、块、页等数据结构添加上我们需要的索引，通过这些索引和offset我们就可以很好的在数据文件上面使用谓词下推，进一步过滤掉我们不需要的数据，除了索引之外orc和parquet都使用了布隆过滤器，通过添加对字段的布隆过滤器来过滤掉无用的数据，从而使我们的计算更加高效。</p>
-<h2 id="orc-vs-parquet-1"><a href="#orc-vs-parquet-1" class="headerlink" title="orc vs parquet"></a>orc vs parquet</h2><p>1、支持类型上，parquet通过sriping&#x2F;assembly算法完美支持嵌套结构。orc支持复杂的数据类型，对嵌套类型支持较差。<br>2、索引上，parquet和orc都有统计信息以及offset索引，并且都支持列的布隆过滤器。<br>3、文件结构上，parquet是row group、column chunk、pag。orc是stipe、row group、stream。总体结构上面比较类似<br>4、压缩上面，parquet支持snappy、gzip、lzo、brotli、lz4、zstd、lz4_raw；orc支持snappy、zlib、none三种<br>5、扩展性上，parquet支持的组件扩展性更好，对于spark也是默认的存储。而orc是rcfile的升级版本，对hive的支持性优化性更好。<br>6、parquet是cloudera开发的；orc是hortonworks开发的。现在俩家公司合并来了。<br>7、编码上：parquet支持更多的编码格式，<br>8、元数据：parquet使用thrift的TCompactProtocol进行元数据序列化，orc使用protocol buffer进行元数据的序列化</p>
-<p>parquet相对于orc的优势：parquet通过sriping&#x2F;assembly算法完美支持嵌套类型，像json、thrift、protocolbuffer等通过defintion level和repeated leve方便对其进行编码以及压缩，parquet里面使用到的编码方式也更多：int、byte上可以使用增量编码来对数据进行编码。（如果需要支持复杂类型的旋用parquet更加有优势）。同时parqeut使cloudera和twitter创建的，拥有更广的适配性，像spark默认也是parquet存储的，适配性更好。</p>
-<p>orc想对于parquet的优势：想对于parquet，orc支持acid以及update操作，如果在hive上面使用acid，像update merge delete这样的操作可以完美的支持，hive3对事务的支持更加完善了。因为orc就是为hadoop而生的，对hive的适配性更好，在hive上面使用拥有更好的压缩比例以及更好的查询性能。orc的拥有更细粒度的索引信息，能够更好的提高查询性能。</p>
+              <h1 id="calcite学习"><a href="#calcite学习" class="headerlink" title="calcite学习"></a>calcite学习</h1><h2 id="什么是calcite？"><a href="#什么是calcite？" class="headerlink" title="什么是calcite？"></a>什么是calcite？</h2><figure class="highlight sql"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><pre><code class="hljs sql">calcite是一个数据库动态管理系统，它提供了一个通用的<span class="hljs-keyword">sql</span>解析、<span class="hljs-keyword">sql</span>校验、<span class="hljs-keyword">sql</span>优化、<span class="hljs-keyword">sql</span>执行的数据库的能力。架构上面是一个灵活的、嵌入式的、可扩展的<br>可以很方便的集成到其他大型项目中去。它的核心是一个关系代数（也是数据库的理论基础），把任何一个查询表示成由关系运算符组成的树。<span class="hljs-keyword">sql</span>转换成关系代数之<br>后，可以进行RBO以及CBO进行规划优化，在保证语义不变的情况下利用一些规则降低成本，来达到一个<span class="hljs-keyword">sql</span>优化的目的。<br></code></pre></td></tr></table></figure>
+
+<h2 id="什么是关系代数"><a href="#什么是关系代数" class="headerlink" title="什么是关系代数"></a>什么是关系代数</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">关系代数是关系型数据库操作的理论基础，关系代数支持并、差、笛卡尔积、投影和选择等基本运算。在处理一个<span class="hljs-keyword">sql</span>语句的时候，首先将sqlzhu转换成关系表达式，<br>然后通过规则匹配进行相应的优化。<br></code></pre></td></tr></table></figure>
+
+<h2 id="calcite有哪些优化器"><a href="#calcite有哪些优化器" class="headerlink" title="calcite有哪些优化器"></a>calcite有哪些优化器</h2><figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">sql</span>的俩种优化器的类型，RBO CBO,RBO对应这规则优化器根据现在的一些规则对<span class="hljs-keyword">sql</span>进行优化，CBO是成本优化器，他不只是给根据我们写好的规则还可以根据数据<br>的实际情况（包括rownumber cpu io memory）来计算所需要的资源，然后智能选取最小的资源方案。起始俩者根本的不同就是根据<span class="hljs-keyword">cost</span>在继续调整更好的规则去优化<span class="hljs-keyword">sql</span>。缺点就是可能需要一定的计算<br>资源提前算出<span class="hljs-keyword">cost</span>。calcite中的hepPlanner就是RBO优化器；VolcanoPlanner就是CBO优化器。<br></code></pre></td></tr></table></figure>
+
+<h2 id="RBO"><a href="#RBO" class="headerlink" title="RBO"></a>RBO</h2><figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs avrasm"><span class="hljs-symbol">RBO:</span>Rule-Base Optimizer,基于规则的优化器。<br>基于规则的优化，起始就是结构的匹配和替换，通过匹配语法树上面结构，然后根据结构的特性保持语义不变的大前提下进行变幻乃至替换。RBO中有自己的一套优化<br>规则顺序，无论表数据量是怎么样的。<br></code></pre></td></tr></table></figure>
+
+<h2 id="CBO"><a href="#CBO" class="headerlink" title="CBO"></a>CBO</h2><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">在RBO中因为都是人为的经验所得的规则，有写系统使用的就是在代码中人工定义了一些规则的优先级来进行<span class="hljs-keyword">bi变换，不能保证变幻之后是否比原来更优，是否性能会</span><br><span class="hljs-keyword"></span>更好，灵活性也相对差一些。而CBO是基于cost（统计信息和代价模型）的优化器。是可能不同的计算方案会有不同的成本，不同的方案其实也是基于不同规则之间的变换来得到的，计算所有<br>规则的成本，选择成本最低的方案为最后的方案得到了最优的结果。主要应用在离线场景<br></code></pre></td></tr></table></figure>
+
+<h2 id="处理流程"><a href="#处理流程" class="headerlink" title="处理流程"></a>处理流程</h2><figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-number">1</span>、解析<span class="hljs-keyword">sql</span>，把<span class="hljs-keyword">sql</span>转化成为AST<br><span class="hljs-number">2</span>、语法检查，根据数据库中的元数据进行语法验证<br><span class="hljs-number">3</span>、语义分析，构建逻辑执行计划<br><span class="hljs-number">4</span>、逻辑计划优化，优化器的核心，根据前面生成的逻辑计划按照相应的<span class="hljs-keyword">rule</span>进行有优化<br><span class="hljs-number">5</span>、物理执行<br></code></pre></td></tr></table></figure>
+
+<h2 id="calcite的处理流程"><a href="#calcite的处理流程" class="headerlink" title="calcite的处理流程"></a>calcite的处理流程</h2><figure class="highlight lasso"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs lasso"><span class="hljs-number">1</span>、sql <span class="hljs-number">2</span> sqlnode:吧sql转换成为抽象语法树<br><span class="hljs-number">2</span>、sqlnode validate：对转换的sqlnode进行校验<br><span class="hljs-number">3</span>、sqlnode <span class="hljs-number">2</span> relnode：把抽象语法树转换成为关系代数<br><span class="hljs-number">4</span>、decorrelate <span class="hljs-literal">and</span> trim field：去相关，去掉不用的字段<br><span class="hljs-number">5</span>、optimize replace rel.root traitset<br><span class="hljs-number">6</span>、顺序应用多个program：执行子查询消除、调用relDecorrelator 和 relFileldTrimmer进行去相关消除字段<br><span class="hljs-number">7</span>、然后会有俩次setroot：<br><span class="hljs-number">8</span>、第一次setroot<br>    a、通过深度遍历，从叶子节点往上遍历<br>    b、首先遍历到叶子节点，为该relnode创建一个relset和一个包含初始relnode的relsubset<br>    c、注册rule对初始的relnode从下往上进行<span class="hljs-keyword">match</span>，<span class="hljs-keyword">match</span>的rule放到<span class="hljs-built_in">queue</span>里面去<br>    d、在这个过程中会初始化cost和维护importance(下边还会init，不知道什么适合确切用到)<br>    e、非叶子节点不同的是会有了input，input会替换为对应的subset<br><span class="hljs-number">9</span>、change <span class="hljs-keyword">trait</span>：rel.root修改对应的<span class="hljs-keyword">trait</span>转成对应的类型，并对转换后的<span class="hljs-keyword">trait</span>添加新的subset（新添加的subset是空的）<br><span class="hljs-number">10</span>、在上面新建出来的relsubset，重新调用setroot，发现<span class="hljs-keyword">trait</span>之间的差异并注册conventer到上面空的subset里面<br><span class="hljs-number">11</span>、然后进入findbestrel<br><span class="hljs-number">12</span>、首先初始化所有的relset的importance<br><span class="hljs-number">13</span>、应用<span class="hljs-built_in">queue</span>中的规则，知道<span class="hljs-built_in">queue</span>中没有数据，找到最优的rel treecc<br></code></pre></td></tr></table></figure>
 
             </div>
             <hr>
             <div>
               <div class="post-metas mb-3">
                 
-                
-                  <div class="post-meta">
-                    <i class="iconfont icon-tags"></i>
-                    
-                      <a class="hover-with-bg" href="/tags/%E5%88%97%E5%BC%8F%E5%AD%98%E5%82%A8/">列式存储</a>
-                    
-                  </div>
                 
               </div>
               
@@ -270,15 +270,15 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/03/02/orc-md/">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">orc.md</span>
-                        <span class="visible-mobile">Vorheriger</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
+                    
+                      <a href="/2022/03/04/hivesql%E4%BC%98%E5%8C%96/">
+                        <span class="hidden-mobile">hivesql优化</span>
+                        <span class="visible-mobile">Nächster</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
                     
                   </article>
                 </div>
