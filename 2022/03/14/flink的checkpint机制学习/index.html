@@ -1,0 +1,579 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="leeseven-li">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="flink分布式快照(Checkpoint)实现精确一次处理语义有俩种方式：1、分布式快照&#x2F;状态检查点 2、至少一次事件传递以及重复数据删除机制  Exactly-Once并不是字面意思，一条数据被精确的处理一次，而是保证sink端的数据只执行了一次完成的事务。说白了就是有效一次：可以保证引擎 管理的状态只提交一次到持久化后端  Chandy-Lamport 算法核心思想：通过每个节点记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="flink的checkpint机制学习">
+<meta property="og:url" content="http://example.com/2022/03/14/flink%E7%9A%84checkpint%E6%9C%BA%E5%88%B6%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
+<meta property="og:description" content="flink分布式快照(Checkpoint)实现精确一次处理语义有俩种方式：1、分布式快照&#x2F;状态检查点 2、至少一次事件传递以及重复数据删除机制  Exactly-Once并不是字面意思，一条数据被精确的处理一次，而是保证sink端的数据只执行了一次完成的事务。说白了就是有效一次：可以保证引擎 管理的状态只提交一次到持久化后端  Chandy-Lamport 算法核心思想：通过每个节点记">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-03-14T08:10:20.000Z">
+<meta property="article:modified_time" content="2022-03-14T08:16:55.897Z">
+<meta property="article:author" content="leeseven-li">
+<meta property="article:tag" content="flink">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>flink的checkpint机制学习 - 大数据/开源/分享</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Leeseven&#39;s 博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/hy.jpeg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="flink的checkpint机制学习">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-03-14 16:10" pubdate>
+        2022年3月14日 下午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      4.7k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      40 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">flink的checkpint机制学习</h1>
+            
+            <div class="markdown-body">
+              <h1 id="flink分布式快照-Checkpoint"><a href="#flink分布式快照-Checkpoint" class="headerlink" title="flink分布式快照(Checkpoint)"></a>flink分布式快照(Checkpoint)</h1><p>实现精确一次处理语义有俩种方式：1、分布式快照&#x2F;状态检查点 2、至少一次事件传递以及重复数据删除机制</p>
+<blockquote>
+<p>Exactly-Once并不是字面意思，一条数据被精确的处理一次，而是保证sink端的数据只执行了一次完成的事务。说白了就是有效一次：可以保证引擎 管理的状态只提交一次到持久化后端</p>
+</blockquote>
+<h2 id="Chandy-Lamport-算法"><a href="#Chandy-Lamport-算法" class="headerlink" title="Chandy-Lamport 算法"></a>Chandy-Lamport 算法</h2><p>核心思想：通过每个节点记录自己状态和于自己相关的状态来合并出全局状态。</p>
+<p>算法的应用条件</p>
+<ul>
+<li>节点之间是一个有向图</li>
+<li>数据有序</li>
+</ul>
+<p>大概流程：因为是有向图，所以节点之间存在输入&#x2F;输出链路，通过一个maker来进行新老「有序」 数据的区分，来做某一个时间点的全局快照。某个节点触发snapshot这时候会生成一个maker，接下来的数据收到的数据也会记录下来，然后把maker传递下去，其他下游节点收到maker之后首先snapshot自己当前的状态，然后传递maker到下游。在传递maker之后，记录下自己在maker之后收到的信息。整个snapshot结束的标志是所有的节点都记录下了自己的snapshot同时也记录之后来的消息（其实就是于自己相关的节点的状态）整个snapshot结束。</p>
+<p>看了许多博客上面都用「至少一次事件事件传递以及重复数据删除」这个机制跟分布式快照做对比，理解一下这个机制，我个人理解其实就是字面意思：保证数据至少进行一次完整都处理，如果一个事件处理多次，需要把重复生成都数据删除。</p>
+<h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><h3 id="大致流程"><a href="#大致流程" class="headerlink" title="大致流程"></a>大致流程</h3><figure class="highlight applescript"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><pre><code class="hljs applescript">暂停处理新流入数据，将数据缓存起来<br>     <span class="hljs-comment">--&gt;  </span><br>     将算子子任务的本地状态<span class="hljs-keyword">copy</span>到一个远程持久化存储上面<br>          <span class="hljs-comment">--&gt;</span><br>          继续处理新流入的数据，包括刚才缓存的数据<br></code></pre></td></tr></table></figure>
+<h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><h4 id="checkpoint-barrier"><a href="#checkpoint-barrier" class="headerlink" title="checkpoint barrier"></a>checkpoint barrier</h4><p>checkpoint barrier检查分界点：就是插入到数据流中的一个标志，不会影响正常数据流的状态，每个barrier都是由checkpoint 的id，这样可以区分每次 checkpoint的范围。</p>
+<p>可以看下面的图理解一下上面对于检查分界点的含义</p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs gherkin">        (checkpint barrier） (barrier)<br>                 |<span class="hljs-string">            </span>|<br>          cp n+1 |<span class="hljs-string">    cp n    </span>|<span class="hljs-string"> cp n-1</span><br><span class="hljs-string">数据元素：   □ □ □ </span>|<span class="hljs-string">   □ □ □ □  </span>|<span class="hljs-string"> □ □</span><br><span class="hljs-string">         ---------------------------&gt;</span><br><span class="hljs-string">         新数据                 老数据 </span><br><span class="hljs-string"></span><br></code></pre></td></tr></table></figure>
+<h4 id="checkpoint-coordinator"><a href="#checkpoint-coordinator" class="headerlink" title="checkpoint coordinator"></a>checkpoint coordinator</h4><p>负责触发checkpoint，收集各个子任务的checkpoint情况，以及2PC的协调者。本身也是ha的。</p>
+<h4 id="State-Backend"><a href="#State-Backend" class="headerlink" title="State Backend"></a>State Backend</h4><p>负责持久化存储快照，是一个组件，通过不同的实现来进行快照和恢复。</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">memoryStateBackend:<br>    基于内存的分布式快照。不能存储过大的数据，只适用于测试不适用于生产，默认的持久化策略<br>    env.set<span class="hljs-constructor">StateBackend(<span class="hljs-params">new</span> MemoryStateBackend(MAX_MEM_STATE_SIZE)</span>)<br>FsStateBackend:<br>    fs都知道，文件系统，这个就是把快站持久化到第三方的文件系统上（hdfs s3等）。支持异步快照<br>    env.set<span class="hljs-constructor">StateBackend(<span class="hljs-params">new</span> FsStateBackend(<span class="hljs-string">&quot;hdfs://namenode:port/flink-checkpoints/job1/&quot;</span>)</span>)<br>    flink的状态本地仍然存在，可以保证快读读写，也能保证大容量故障恢复<br>RockDBStateBackend:<br>    rockbd是一个k-v数据库，面对更大的状态快照存储，rockdb支持更大容量的状态存储。<br>    env.set<span class="hljs-constructor">StateBackend(<span class="hljs-params">new</span> RocksDBStateBackend(<span class="hljs-params">checkpointPath</span>, <span class="hljs-params">enableIncrementalCheckpointing</span>)</span>)<br>    该持久化策略支持增量快照，只针对发生变化的状态，这样可以明显的降低快照时间。代价就是重启恢复更长。<br><br><br></code></pre></td></tr></table></figure>
+<h3 id="详细流程"><a href="#详细流程" class="headerlink" title="详细流程"></a>详细流程</h3><p>首先，checkpoint coordinator触发一次checkpoint，发送给各个子任务</p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs lasso">checkpoint<span class="hljs-params">-coordinator</span><br>   👇         👇<br>   👇         👇 triger checkpoint<br>   👇         👇<br>source1     source2<br>   |          |<br>opeartor    operator<br><br>     <span class="hljs-params">...</span><span class="hljs-params">...</span><span class="hljs-params">...</span>.<br>     <span class="hljs-params">...</span><span class="hljs-params">...</span><span class="hljs-params">...</span><br>   <br>sink   sink   sink<br></code></pre></td></tr></table></figure>
+<p>各个source子任务收到cc请求之后，会将自己的状态写入到state backend，完成一次快照，然后向cc汇报自己已经快照完成，完成之后向下游广播barrier</p>
+<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs pf">       cc<br>       ↑↓<br><span class="hljs-number">3</span> ack  ↑↓ <span class="hljs-number">1</span>、发送checkpoint消息<br>       ↑↓<br>     source -&gt; <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span> -&gt; <span class="hljs-number">1</span>,<span class="hljs-number">3</span> ... -&gt; sink<br>        ↘ <span class="hljs-number">2</span>、source收到之后会像<span class="hljs-keyword">state</span> backend写入自己的状态<br>        <span class="hljs-keyword">state</span> backend<br><br><br></code></pre></td></tr></table></figure>
+<p>下游算子可能有很多个，source把cp id广播给了所有的下游算子。下游所有的算子里面都会有cp id，但是算子的处理进度也可能会不同，所以就需要进行对其操作接下来我们看下如何进行数据对齐：</p>
+<p>用俩个barrier来举例，一个barrier已经到达，另外一个还未到达</p>
+<figure class="highlight coq"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs coq">| <span class="hljs-type">代表barrier</span><br><br>barrier已经到达<br><span class="hljs-number">1</span>,<span class="hljs-number">2</span> |<span class="hljs-type">↘ </span><br><span class="hljs-type">       ↘</span><br><span class="hljs-type">      operator</span> --&gt; .... --&gt; sink   <br>       ↗<br>|<span class="hljs-type">a</span>,b ↗ <br>barrier未到达<br><br></code></pre></td></tr></table></figure>
+<p>这时候就需要进行对齐操作,如何对齐呢，上边barrier已经到达了，所以此时在barrier之后来电1 2需要在内存中缓存下来，下边的barrier在a、b之后，所以可以<br>继续向后传播：</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs xl"><br><span class="hljs-number">1</span>  ↘ <br>      ↘<br>     （缓存：<span class="hljs-number">2</span>）<br>     <span class="hljs-function"><span class="hljs-title">operator</span> --&gt;</span> <span class="hljs-function"><span class="hljs-title">b</span> .... --&gt;</span> sink   <br>      ↗<br> |a ↗ <br><br></code></pre></td></tr></table></figure>
+<p>对齐之后,上一阶段的checkpoint数据都已经流入到下一个算子：</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs xl"><span class="hljs-number">1</span>  ↘ <br>      ↘<br>     （缓存：<span class="hljs-number">2</span>,<span class="hljs-number">1</span>）<br>     <span class="hljs-function"><span class="hljs-title">operator</span> --&gt;</span> | <span class="hljs-function"><span class="hljs-title">a</span> b .... --&gt;</span> sink   <br>      ↗           👇<br> c ↗           barrier传递<br></code></pre></td></tr></table></figure>
+<p>对齐之后该算子就可以执行快照了，把状态存入到state backend里面去，一层一层传递下去：</p>
+<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs pf"><span class="hljs-number">1</span>  ↘ <br>      ↘<br>     （缓存：<span class="hljs-number">2</span>,<span class="hljs-number">1</span>）<br>     operator --&gt; | a b .... --&gt; sink   <br>      ↗ 👇        👇<br> c ↗    👇     barrier传递<br>   <span class="hljs-keyword">state</span> backend<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>对齐操作：<br>1、当前算子进入了第一个cpid&#x3D;n的barrier，但是其他barrier还没有到<br>2、这时候通道barrier已经到了的数据还会接着来数据，这时候的数据会缓存到内存中，直到所有的barrier到齐<br>3、如果所有barrier都到了，那么就开始执行快照操作<br>4、快照完成，处理缓存中的数据，同时也处理新到的数据</p>
+</blockquote>
+<p>如果所有的sink都完成快照之后，证明cpid&#x3D;n该checkpoint执行结束，这时候cc会向state backend写入本次checkpoint的元数据，结束</p>
+<h3 id="快照如何优化"><a href="#快照如何优化" class="headerlink" title="快照如何优化"></a>快照如何优化</h3><p>思考一下，上面的快照有什么问题？</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs">1、由于每次快照操作都会暂停处理新数据，如果快照事件比较长的话造成效率不高。<br>2、对齐操作，每个通道的数据不一样，这样就会造成数据堵塞<br></code></pre></td></tr></table></figure>
+<h4 id="异步快照"><a href="#异步快照" class="headerlink" title="异步快照"></a>异步快照</h4><p>主要是为了解决第一个问题，快照时间的问题，只要所有barrier到达，barrier就立刻向下传播并且开始处理新数据，快照启动一个异步线程去执行，不会造成停顿。   </p>
+<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs pf">barrier到达 --&gt; 立刻传播<br>     👇<br>同时启动一个线程进行异步操作：<br>该线程负责向<span class="hljs-keyword">state</span> backend上面copy数据，copy完成也是该线程向cc发送确认消息。<br></code></pre></td></tr></table></figure>
+<p>由于状态可能在持续的变化中，后续的算子也在运行，如何保证该阶段的内存数据呢，最简单的就是向下传递的时候对当时的状态复制一份，但是这样又比较占用空间， flink使用的是 copy on wirte的优化策略：如果这份内存数据没有变化，那就没必要复制一份数据，如果内存中的数据变化，那么再申请内存维护俩分数据：快照和更新后的数据</p>
+<h4 id="跳过对齐"><a href="#跳过对齐" class="headerlink" title="跳过对齐"></a>跳过对齐</h4><p>跳过对齐就是允许barrier没全部到达就允许barrier向下传播，但是为了保证数据的一致性，需要把较慢的元素一起快照，如果发生故障，这些数据也会重新处理</p>
+<h2 id="相关配置"><a href="#相关配置" class="headerlink" title="相关配置"></a>相关配置</h2><p>flink的checkpoint都封装到了CheckpointConfig里面</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">val cpConfig: CheckpointConfig = <span class="hljs-keyword">env</span>.getCheckpointConfig<br></code></pre></td></tr></table></figure>
+<p>使用至少一次语义</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">env<span class="hljs-selector-class">.getCheckpointConfig</span><span class="hljs-selector-class">.setCheckpointingMode</span>(CheckpointingMode.AT_LEAST_ONCE)<br></code></pre></td></tr></table></figure>
+<p>超时关闭checkpoint</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">env</span>.getCheckpointConfig.setCheckpointTimeout(<span class="hljs-number">3600</span>*<span class="hljs-number">1000</span>)<br></code></pre></td></tr></table></figure>
+<p>checkpoint间隔</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">env</span>.getCheckpointConfig.setMinPauseBetweenCheckpoints(<span class="hljs-number">60</span>*<span class="hljs-number">1000</span>)<br></code></pre></td></tr></table></figure>
+<p>一起进行的checkpoint数量</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus">env<span class="hljs-selector-class">.getCheckpointConfig</span><span class="hljs-selector-class">.setMaxConcurrentCheckpoints</span>(<span class="hljs-number">3</span>)<br></code></pre></td></tr></table></figure>
+<p>主动取消恢复(默认是故障恢复)</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus">env<span class="hljs-selector-class">.getCheckpointConfig</span><span class="hljs-selector-class">.enableExternalizedCheckpoints</span>(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)<br>DELETE_ON_CANCELLATION:cancel job时候，删除检查点<br></code></pre></td></tr></table></figure>
+<p>checkpoint失败是否需要重启</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">env.getCheckpointConfig.set<span class="hljs-constructor">FailOnCheckpointingErrors(<span class="hljs-params">false</span>)</span>z<br></code></pre></td></tr></table></figure>
+<p>修改state backend</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">env.set<span class="hljs-constructor">StateBackend(<span class="hljs-params">new</span> FsStateBackend(<span class="hljs-string">&quot;hdfs://namenode:9000/flink/checkpoints&quot;</span>)</span>);<br><span class="hljs-keyword">new</span> <span class="hljs-constructor">MemoryStateBackend()</span>;<br><span class="hljs-keyword">new</span> <span class="hljs-constructor">RocksDBStateBackend(<span class="hljs-params">filebackend</span>, <span class="hljs-params">true</span>)</span>;<span class="hljs-comment">//需要添加第三方依赖</span><br></code></pre></td></tr></table></figure>
+<p>修改默认state backend:flink-conf.yaml</p>
+<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs pf"><span class="hljs-keyword">state</span>.backend: filesystem<br><span class="hljs-keyword">state</span>.checkpoints.dir: hdfs://namenode:<span class="hljs-number">9000</span>/flink/checkpoints<br><span class="hljs-keyword">state</span>.backend的值可以是下面几种：jobmanager(MemoryStateBackend), filesystem(FsStateBackend), rocksdb(RocksDBStateBackend)<br></code></pre></td></tr></table></figure>
+<p>失败延迟重启</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs stylus">val env = ExecutionEnvironment<span class="hljs-selector-class">.getExecutionEnvironment</span>()<br>env<span class="hljs-selector-class">.setRestartStrategy</span>(RestartStrategies<span class="hljs-selector-class">.fixedDelayRestart</span>(<br>  <span class="hljs-number">3</span>, <span class="hljs-comment">// 重启次数</span><br>  Time<span class="hljs-selector-class">.of</span>(<span class="hljs-number">10</span>, TimeUnit.SECONDS) <span class="hljs-comment">// 延迟时间间隔</span><br>))<br></code></pre></td></tr></table></figure>
+<p>失败率重启</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs stylus">val env = ExecutionEnvironment<span class="hljs-selector-class">.getExecutionEnvironment</span>()<br>env<span class="hljs-selector-class">.setRestartStrategy</span>(RestartStrategies<span class="hljs-selector-class">.fixedDelayRestart</span>(<br>  <span class="hljs-number">3</span>, <span class="hljs-comment">// 重启次数</span><br>  Time<span class="hljs-selector-class">.of</span>(<span class="hljs-number">10</span>, TimeUnit.SECONDS) <span class="hljs-comment">// 延迟时间间隔</span><br>))<br></code></pre></td></tr></table></figure>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/flink/">flink</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/flink/">flink</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/03/10/hash%E7%AE%97%E6%B3%95%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95/">
+                        <span class="hidden-mobile">hash算法和一致性hash算法</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+              <!-- Comments -->
+              <article class="comments" id="comments" lazyload>
+                
+                  
+                
+                
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-dark';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'leeseven-li/leeseven-li.github.io');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+              </article>
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

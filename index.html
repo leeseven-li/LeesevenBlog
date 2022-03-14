@@ -187,6 +187,100 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
+        <a href="/2022/03/14/flink%E7%9A%84checkpint%E6%9C%BA%E5%88%B6%E5%AD%A6%E4%B9%A0/" target="_self">
+          flink的checkpint机制学习
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2022/03/14/flink%E7%9A%84checkpint%E6%9C%BA%E5%88%B6%E5%AD%A6%E4%B9%A0/" target="_self">
+          
+          flink分布式快照(Checkpoint)实现精确一次处理语义有俩种方式：1、分布式快照&#x2F;状态检查点 2、至少一次事件传递以及重复数据删除机制  Exactly-Once并不是字面意思，一条数据被精确的处理一次，而是保证sink端的数据只执行了一次完成的事务。说白了就是有效一次：可以保证引擎 管理的状态只提交一次到持久化后端  Chandy-Lamport 算法核心思想：通过每个节点记
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2022-03-14 16:10" pubdate>
+              2022-03-14
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/flink/">flink</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/flink/">flink</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2022/03/10/hash%E7%AE%97%E6%B3%95%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95/" target="_self">
+          hash算法和一致性hash算法
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2022/03/10/hash%E7%AE%97%E6%B3%95%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95/" target="_self">
+          
+          hash算法和一致性hash算法hash表就是我们经常使用的map结构，给定一个key值，通过映射规则找到一个表中的位置来访问该元素，这样查找速度很快。映射规则就是散列函数，存放数据的叫散列表。最常用就是key进行hash取值，然后对表的长度进行取余。最后得到的就是散列表的位置。 HASHHash就是散列，给定任意长度的输入通过散列算法，变成固定长度的输出，得到散列值。这种转换其实是一个压缩映射，
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2022-03-10 14:22" pubdate>
+              2022-03-10
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/%E7%AE%97%E6%B3%95/">算法</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/hash/">hash</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
         <a href="/2022/03/08/%E5%B8%B8%E7%94%A8%E5%8E%8B%E7%BC%A9%E7%BC%96%E7%A0%81/" target="_self">
           常用压缩编码
         </a>
