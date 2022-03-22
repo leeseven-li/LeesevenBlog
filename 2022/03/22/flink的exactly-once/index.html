@@ -19,7 +19,7 @@
     <meta name="description" content="Flink端到端的精确一次处理语义端到端精确一次处理语义EOS一个完整的应用包括source、flink、sink三部分，如果要做到端到端的精确一次处理，其实主要是保证最终sink端的数据不会缺少，也不会重复。之前的步骤主要是为了保证sink端的输出的。针对于source端，只需要保证数据的可重复读取就行，像kafka我们可以保存offset来进行数据的重复读取，这样有一些已经读取的数据就算处理失">
 <meta property="og:type" content="article">
 <meta property="og:title" content="flink的exactly-once">
-<meta property="og:url" content="http://example.com/2022/03/22/flink%E7%9A%84exactly-once/index.html">
+<meta property="og:url" content="https://leeseven-li.github.io/2022/03/22/flink%E7%9A%84exactly-once/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
 <meta property="og:description" content="Flink端到端的精确一次处理语义端到端精确一次处理语义EOS一个完整的应用包括source、flink、sink三部分，如果要做到端到端的精确一次处理，其实主要是保证最终sink端的数据不会缺少，也不会重复。之前的步骤主要是为了保证sink端的输出的。针对于source端，只需要保证数据的可重复读取就行，像kafka我们可以保存offset来进行数据的重复读取，这样有一些已经读取的数据就算处理失">
 <meta property="og:locale" content="zh_CN">
@@ -67,7 +67,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"leeseven-li.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>

@@ -19,7 +19,7 @@
     <meta name="description" content="orc vs parquetorc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。 列式存储的优势列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不">
 <meta property="og:type" content="article">
 <meta property="og:title" content="orc和parquet">
-<meta property="og:url" content="http://example.com/2022/02/09/orc-vs-parquet/index.html">
+<meta property="og:url" content="https://leeseven-li.github.io/2022/02/09/orc-vs-parquet/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
 <meta property="og:description" content="orc vs parquetorc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。 列式存储的优势列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不">
 <meta property="og:locale" content="zh_CN">
@@ -67,7 +67,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"leeseven-li.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>

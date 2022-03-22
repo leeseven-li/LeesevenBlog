@@ -19,7 +19,7 @@
     <meta name="description" content="hash算法和一致性hash算法hash表就是我们经常使用的map结构，给定一个key值，通过映射规则找到一个表中的位置来访问该元素，这样查找速度很快。映射规则就是散列函数，存放数据的叫散列表。最常用就是key进行hash取值，然后对表的长度进行取余。最后得到的就是散列表的位置。 HASHHash就是散列，给定任意长度的输入通过散列算法，变成固定长度的输出，得到散列值。这种转换其实是一个压缩映射，">
 <meta property="og:type" content="article">
 <meta property="og:title" content="hash算法和一致性hash算法">
-<meta property="og:url" content="http://example.com/2022/03/10/hash%E7%AE%97%E6%B3%95%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:url" content="https://leeseven-li.github.io/2022/03/10/hash%E7%AE%97%E6%B3%95%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
 <meta property="og:description" content="hash算法和一致性hash算法hash表就是我们经常使用的map结构，给定一个key值，通过映射规则找到一个表中的位置来访问该元素，这样查找速度很快。映射规则就是散列函数，存放数据的叫散列表。最常用就是key进行hash取值，然后对表的长度进行取余。最后得到的就是散列表的位置。 HASHHash就是散列，给定任意长度的输入通过散列算法，变成固定长度的输出，得到散列值。这种转换其实是一个压缩映射，">
 <meta property="og:locale" content="zh_CN">
@@ -67,7 +67,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"leeseven-li.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>

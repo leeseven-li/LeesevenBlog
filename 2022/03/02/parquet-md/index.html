@@ -19,7 +19,7 @@
     <meta name="description" content="PARQUET优势12341、更高的压缩比可以减少磁盘的使用2、更少的IO操作使用映射下推和谓词下推，可以读取需要的列，过滤掉不需要的列，减少不必要的数据扫描，尤其对于表字段比较多的时候优势明显。&gt; 映射下推：列式存储最突出的优势，数据扫描的时候，只需要扫描需要的列，避免全表扫描&gt; 谓词下推：将过滤条件在最底层执行减少结果集  如何提升parquet的查询性能121、对需要频繁过滤的列">
 <meta property="og:type" content="article">
 <meta property="og:title" content="parquet">
-<meta property="og:url" content="http://example.com/2022/03/02/parquet-md/index.html">
+<meta property="og:url" content="https://leeseven-li.github.io/2022/03/02/parquet-md/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
 <meta property="og:description" content="PARQUET优势12341、更高的压缩比可以减少磁盘的使用2、更少的IO操作使用映射下推和谓词下推，可以读取需要的列，过滤掉不需要的列，减少不必要的数据扫描，尤其对于表字段比较多的时候优势明显。&gt; 映射下推：列式存储最突出的优势，数据扫描的时候，只需要扫描需要的列，避免全表扫描&gt; 谓词下推：将过滤条件在最底层执行减少结果集  如何提升parquet的查询性能121、对需要频繁过滤的列">
 <meta property="og:locale" content="zh_CN">
@@ -67,7 +67,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"leeseven-li.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
