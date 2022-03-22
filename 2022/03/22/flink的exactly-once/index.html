@@ -1,0 +1,546 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="leeseven-li">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Flink端到端的精确一次处理语义端到端精确一次处理语义EOS一个完整的应用包括source、flink、sink三部分，如果要做到端到端的精确一次处理，其实主要是保证最终sink端的数据不会缺少，也不会重复。之前的步骤主要是为了保证sink端的输出的。针对于source端，只需要保证数据的可重复读取就行，像kafka我们可以保存offset来进行数据的重复读取，这样有一些已经读取的数据就算处理失">
+<meta property="og:type" content="article">
+<meta property="og:title" content="flink的exactly-once">
+<meta property="og:url" content="http://example.com/2022/03/22/flink%E7%9A%84exactly-once/index.html">
+<meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
+<meta property="og:description" content="Flink端到端的精确一次处理语义端到端精确一次处理语义EOS一个完整的应用包括source、flink、sink三部分，如果要做到端到端的精确一次处理，其实主要是保证最终sink端的数据不会缺少，也不会重复。之前的步骤主要是为了保证sink端的输出的。针对于source端，只需要保证数据的可重复读取就行，像kafka我们可以保存offset来进行数据的重复读取，这样有一些已经读取的数据就算处理失">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-03-22T01:49:40.000Z">
+<meta property="article:modified_time" content="2022-03-22T01:50:49.590Z">
+<meta property="article:author" content="leeseven-li">
+<meta property="article:tag" content="flink 2PC">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>flink的exactly-once - 大数据/开源/分享</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Leeseven&#39;s 博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/hy.jpeg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="flink的exactly-once">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-03-22 09:49" pubdate>
+        2022年3月22日 上午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      3k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      25 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">flink的exactly-once</h1>
+            
+            <div class="markdown-body">
+              <h1 id="Flink端到端的精确一次处理语义"><a href="#Flink端到端的精确一次处理语义" class="headerlink" title="Flink端到端的精确一次处理语义"></a>Flink端到端的精确一次处理语义</h1><h2 id="端到端精确一次处理语义EOS"><a href="#端到端精确一次处理语义EOS" class="headerlink" title="端到端精确一次处理语义EOS"></a>端到端精确一次处理语义EOS</h2><p>一个完整的应用包括source、flink、sink三部分，如果要做到端到端的精确一次处理，其实主要是保证最终sink端的数据不会缺少，也不会重复。之前的步骤主要是为了保证sink端的输出的。针对于source端，只需要保证数据的可重复读取就行，像kafka我们可以保存offset来进行数据的重复读取，这样有一些已经读取的数据就算处理失败了，也还可以进行重复读取。flink端的话主要是针对数据的处理，主要是能够记录下当时处理的状态，就算处理失败了也可以对数据重新按照历史的状态重新处理，而sink端需要支持一些事务或者一些回滚的操作，如果数据失败了，直接进行回滚到某一个时间段的状态，然后从新处理数据就可以。</p>
+<h2 id="2PC-俩阶段提交协议"><a href="#2PC-俩阶段提交协议" class="headerlink" title="2PC 俩阶段提交协议"></a>2PC 俩阶段提交协议</h2><p>俩阶段提交协议(Two-phase Commit,2PC)是很常用的解决分布式事务问题的方式，它可以保证在分布式事务中，要么参与进程都提交事务，要么都取消，即实现ACID 中的A原子性。</p>
+<p>在数据一致的环境下，其代表含义是：要么所有备份数据同时更改某个值，要么都不改，以此来达到强一致性。</p>
+<p>俩段提交中有俩个重要的角色，协调者和参与者，其协调者只能有一个，起到分布式事务中的协调管理作用，参与者多个。</p>
+<h3 id="第一阶段：表决阶段"><a href="#第一阶段：表决阶段" class="headerlink" title="第一阶段：表决阶段"></a>第一阶段：表决阶段</h3><p>1、协调者向所有参与者发送一个vote request的消息。</p>
+<p>2、参与者接收到vote request消息，向协调者发送vote commit消息作为回应，告诉协调者自己已经做好提交准备，如果参与者没有准备好或遇到其他故障，就<br>返回一个vote abort消息，告诉协调者目前无法提交事务</p>
+<h3 id="第二阶段：提交阶段"><a href="#第二阶段：提交阶段" class="headerlink" title="第二阶段：提交阶段"></a>第二阶段：提交阶段</h3><p>1、协调者收集到了各个参与者的表决消息，如果所有参与者一致认为可以提交事务，那么协调者决定事务的最终提交，在此情形下协调者向所有参与者发送要给global commit消息，通知参与者进行本地提交，如果所有参与者中有任意一个返回消息是vote abort，协调者就会取消事务，向所有参与者广播一条global abort的消息 通知所有参与者取消事务。</p>
+<p>2、每个提交了表决信息的参与者等候协调者返回消息，如果参与者接受到一个global commit的消息，那就参与提交本地事务，否则收到global abort就取消</p>
+<h2 id="2PC-flink中应用"><a href="#2PC-flink中应用" class="headerlink" title="2PC flink中应用"></a>2PC flink中应用</h2><p>1、当checkpoint启动时，jobmanager会将检查分界线（checkpoint barrier）注入到数据流中，checkpoint barrier会在算子间传递下去：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><pre><code class="hljs markdown">pre-commit  <br><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><span class="hljs-strong">____</span><br><span class="hljs-code">            jobmanager</span><br><span class="hljs-code">                |</span><br><span class="hljs-code">                | 注入 checkpoint barrier</span><br><span class="hljs-code">                ⬇</span><br><span class="hljs-code">kafka =&gt;   | datasource  =&gt; window =&gt;  datasink  |   =&gt; kafka</span><br><span class="hljs-code">外部系统      fink source   operator   flink sink       外部系统</span><br></code></pre></td></tr></table></figure>
+<p>2、flink kafka source负责保存kafka消费的offset，当checkpoint成功时flink负责提交这些写入，否则就终止取消他们。当checkpoint完成位移保存，它会将checkpoint barrier传递给下一个operator，然后每个算子会对当前状态做个快照，保存状态到后端:   </p>
+<figure class="highlight coq"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs coq">            jobmanager<br>                |<br>                <span class="hljs-type">| 注入barrier</span><br>                ⬇<br>kafka =&gt;   | <span class="hljs-type">datasource</span>  =&gt; window =&gt;  datasink  |   <span class="hljs-type">=&gt; kafka</span><br>外部系统      fink source   operator   flink sink       外部系统<br>                |    <span class="hljs-type">↘         ↙</span><br><span class="hljs-type">                |       ↘   ↙</span><br><span class="hljs-type">                ⬇     传递barrier</span><br>          保存offset快照<br>         （state backend）<br></code></pre></td></tr></table></figure>
+<p>3、flink处理完就到了sink端，每个内部的transform任务遇到checkpoint barrier时，都会把状态保存到checkpoint里面。数据处理到sink端的时候，sink首先把数据写入到外部的kafka， 这些数据都是预提交。   </p>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs gherkin">     jobmanager<br>         ↘         传递barrier 传递barrier<br>注入barrier ↘           ↗  ↖      ↗ ↖<br>              ↘      ↗       ↖ ↗       ↖<br>kafka =&gt;   |<span class="hljs-string"> datasource  =&gt; window =&gt;  datasink  </span>|<span class="hljs-string">   =&gt; kafka</span><br><span class="hljs-string">外部系统      fink source   operator   flink sink       外部系统</span><br><span class="hljs-string">                </span>|<span class="hljs-string">            </span>|<span class="hljs-string">            </span>|<br>                |<span class="hljs-string">            </span>|<span class="hljs-string">            </span>|<br>                ⬇            ⬇            ⬇<br>            offset快照    offset快照    offset快照<br>          ===============state backend===============<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>此时pre commit预提交阶段下sink在保存状态到状态后端的同时还需要提交他们的外部事务</p>
+</blockquote>
+<p>4、当所有算子任务快照完成，也就是这次的checkpoint完成时，jobmanager会向所有任务发送通知，确认这次checkpoint完成，此时pre commit才算完成。 然后就进入了第二个阶段：commit，该阶段JobManager会为应用中每个operator发起checkpoint已完成的回调函数。   </p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">                         jobmanager<br>                           ↙ | ↘ <br>                         ↙   |    ↘  通知<span class="hljs-keyword">checkpoint</span>完成<br>                      ↙      ⬇       ↘<br>kafka =&gt;   | datasource  =&gt; <span class="hljs-keyword">window</span> =&gt;  datasink  |   =&gt; kafka<br>外部系统      fink source   <span class="hljs-keyword">operator</span>   flink sink       外部系统<br>                                            ↘             ↗<br>                                                ↘       ↗<br>                                                    ↘ ↗<br>                                                提交外部事务<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>flink的jobmanager协调各个TaskManager进行checkout存储，checkpoint保存在stateBackend中</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h3 id="预提交"><a href="#预提交" class="headerlink" title="预提交"></a>预提交</h3><p>Flink消费到kafka的数据之后，就会开启一个kafka的事务，正常写入kafka的数据都是未提交阶段。</p>
+<h3 id="commit"><a href="#commit" class="headerlink" title="commit"></a>commit</h3><p>如果所有的operator完成各自的pre commit，他们会发送一个commit操作</p>
+<h3 id="pre-commit失败"><a href="#pre-commit失败" class="headerlink" title="pre commit失败"></a>pre commit失败</h3><p>如果任何一个pre commit失败，所有的pre commit都会终止，flink也会回滚到上一个checkpoint</p>
+<h3 id="pre-commit-finish"><a href="#pre-commit-finish" class="headerlink" title="pre commit finish"></a>pre commit finish</h3><p>当所有的operator完成，sink就会收到checkpoint barrier，sink保存当前状态，存入到checkpoint里面，通知jobmanater，并提交外部事务，用于提交<br>外部检查点的数据</p>
+<h3 id="tow-commit"><a href="#tow-commit" class="headerlink" title="tow commit"></a>tow commit</h3><p>JobManager收到所有任务的通知，发出确认消息，表示checkpoint已经完成，sink收到jobmanager的确认消息，最终commit这段数据。</p>
+<h3 id="close"><a href="#close" class="headerlink" title="close"></a>close</h3><p>外部系统kafka关闭事务，提交的数据可以正常消费。</p>
+<blockquote>
+<p>一旦pre commit提交完成，必须要确保commit也要成功，operatr和外部系统都需要对此进行保证，如果commit失败，flink就会崩溃，然后根据用户的重启 策略进行重启，之后重试commit，这个过程非常重要，因为commit无法成功执行，就可能出现丢数据的情况，因此所有operator必须对checkpoint最终执行结果达成共识（所有的operator都必须确认数据要么全部执行成功，要么终止进行回滚）</p>
+</blockquote>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/flink/">flink</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/flink-2PC/">flink 2PC</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/03/14/flink%E7%9A%84checkpint%E6%9C%BA%E5%88%B6%E5%AD%A6%E4%B9%A0/">
+                        <span class="hidden-mobile">flink的checkpint机制学习</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+              <!-- Comments -->
+              <article class="comments" id="comments" lazyload>
+                
+                  
+                
+                
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-dark';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'leeseven-li/leeseven-li.github.io');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+              </article>
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
