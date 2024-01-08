@@ -1,0 +1,567 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="leeseven-li">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="2pc paxos zab2pc俩阶段提交协议，主要解决分布式事务一致性算法。  2：俩阶段 p：准备阶段 c：提交阶段  应用场景：关系型数据库事务实现、flink的checkpoint机制 2PC算法思路可以概括：参与者将操作成败通知协调者，再由协调者根据所有参与者的反馈情报决定各参与者是否需要操作还是中止事务。主要用来解决分布式事务的原子性问题，其中2阶段分为：准备阶段和提交阶段。 第一阶段">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zab">
+<meta property="og:url" content="https://leeseven-li.github.io/2024/01/08/2pc%20paxos%20zab/index.html">
+<meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
+<meta property="og:description" content="2pc paxos zab2pc俩阶段提交协议，主要解决分布式事务一致性算法。  2：俩阶段 p：准备阶段 c：提交阶段  应用场景：关系型数据库事务实现、flink的checkpoint机制 2PC算法思路可以概括：参与者将操作成败通知协调者，再由协调者根据所有参与者的反馈情报决定各参与者是否需要操作还是中止事务。主要用来解决分布式事务的原子性问题，其中2阶段分为：准备阶段和提交阶段。 第一阶段">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-01-08T08:34:04.000Z">
+<meta property="article:modified_time" content="2024-01-08T08:35:39.547Z">
+<meta property="article:author" content="leeseven-li">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>zab - 大数据/开源/分享</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"leeseven-li.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Leeseven&#39;s 博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/hy.jpeg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="zab">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2024-01-08 16:34" pubdate>
+        2024年1月8日 下午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.8k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      16 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">zab</h1>
+            
+            <div class="markdown-body">
+              <h1 id="2pc-paxos-zab"><a href="#2pc-paxos-zab" class="headerlink" title="2pc paxos zab"></a>2pc paxos zab</h1><h2 id="2pc"><a href="#2pc" class="headerlink" title="2pc"></a>2pc</h2><p>俩阶段提交协议，主要解决分布式事务一致性算法。</p>
+<ul>
+<li>2：俩阶段</li>
+<li>p：准备阶段</li>
+<li>c：提交阶段</li>
+</ul>
+<p>应用场景：关系型数据库事务实现、flink的checkpoint机制</p>
+<p>2PC算法思路可以概括：参与者将操作成败通知协调者，再由协调者根据所有参与者的反馈情报决定各参与者是否需要操作还是中止事务。主要用来解决分布式事务的原子性问题，其中2阶段分为：准备阶段和提交阶段。</p>
+<p>第一阶段：准备阶段<br>事务协调者给每个参与者发送prepare消息，参与者有俩中情况可以返回，第一种可以直接返回失败；第二种是在本地执行事务，不提交，饭后返回成功。</p>
+<p>第二阶段：提交阶段<br>协调者收到参与者返回之后的消息，根据参与者返回的消息，确认本次操作每个参与者是提交还是中止</p>
+<h2 id="paxos"><a href="#paxos" class="headerlink" title="paxos"></a>paxos</h2><p>paxos是莱斯利兰伯特发明的一种分布式共识算法，是第一个有完整数学证明的共识算法。</p>
+<p>理解：paxos算法允许系统在出现网络分区，只要其中一个分区的节点个数保持过半，对外就能保证可用以及数据的最终一致性（最终所有节点拥有相同的更新），解决单点失败故障的同时，尽可能减少对吞吐量和延迟的影响。</p>
+<p>应用场景：选主、replication一致性</p>
+<p>proposer:提出者<br>acceptor:决策者<br>learner:学习者</p>
+<p>paxos类似于俩阶段提交，主要也是分为俩个阶段：prepare和accept，但是其实能算上一个阶段是增加了一个学习阶段</p>
+<p>第一阶段：propare阶段<br>proposer提出一个编号为N的提议并发给半数以上的acceptor，acceptor收到提议后有俩种情况。</p>
+<ol>
+<li>acceptor没有接受过提案，直接接受该编号N</li>
+<li>acceptor接受过提案N&#96;，那么就先判断编号跟N的大小关系：<ul>
+<li>N&#96; &gt; N 直接回复error</li>
+<li>N&#96; &lt; N 这时候还会有俩中情况，因为不确实是否已经确认accept已经accept某值<ul>
+<li>如果有，那么吧这个值返回给proposer</li>
+<li>如果没有，直接返回promise</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>第二阶段：接受阶段</p>
+<ol>
+<li>proposer:如果accept返回promise的消息里面没有任何value，那么就自己确定value去给超过半数的accept发送accept</li>
+<li>proposer:如果accept返回promise的消息里面有value，那么就取返回消息种最大编号N的value值作为本次accept发送的请求的value</li>
+<li>acceptor:只要没有收到过比proposer编号大的请求，那么就接受本次的请求</li>
+<li>acceptor:如果收到过比本次请求还打的编码，那么就会拒接本次请求</li>
+</ol>
+<p>第三阶段：学习阶段<br>只要某个提议本超过半数的acceptor接受，那么proposer就会发送消息到learner进行学习。</p>
+<h2 id="zab"><a href="#zab" class="headerlink" title="zab"></a>zab</h2><ul>
+<li>z:zookeeper</li>
+<li>a:atomic原子</li>
+<li>b:broadcast广播</li>
+</ul>
+<p>zab是zookeeper专门设计的一种奔溃回复的原子广播协议，是保证zookeeper一致性的核心算法。</p>
+<p>应用场景：负载均衡、协调通知、集群管理、选举、分布式锁、分布式队列</p>
+<ul>
+<li>消息广播</li>
+</ul>
+<ol>
+<li>客户端发送请求到zk集群，如果该节点是不是leader，那么该follower就会把请求转发给leader。</li>
+<li>leader收到请求之后会进行广播该请求，吧每个请求封装成一个事务，并分配一个zxid</li>
+<li>leader内部会为每个follower分配一个单独的队列，主要用来保证事务的顺序，然后吧本次事务放到队列里面</li>
+<li>follower收到leader发送的事务之后会把事务以日志的形式写入到磁盘，写入成功之后给leader发送ack响应</li>
+<li>leader收到半数的ack响应之后就会发送一个commit请求给所有的follower，follower收到之后对本地的事务进行提交</li>
+<li>leader上面也进行事务的提交</li>
+</ol>
+<ul>
+<li>崩溃恢复：选举leader 和 数据同步</li>
+</ul>
+<ol>
+<li>检测节点处于looking阶段，开始选举leader</li>
+<li>如果是新启动的集群那么每个节点都会投票给自己，初始值zxid为0，epoch是本地配置的节点id；如果是运行期间那么每个节点上面的zxid不再为0，发送自己已经到达的zxid</li>
+<li>最终获取半数以上同意有最新事务的作为本次选取的leader</li>
+<li>最后进行数据同步，有四种数据同步策略：差异化同步、先回滚再差异化同步、回滚同步、全量同步</li>
+</ol>
+<h2 id="paxos-和-zab"><a href="#paxos-和-zab" class="headerlink" title="paxos 和 zab"></a>paxos 和 zab</h2><ol>
+<li>paxos算法是用于构建一个分布式一致性状态机的，而zab主要用于构建一个分布式的主备系统</li>
+<li>paxos是一种通用的分布式共识算法，zab协议是专门为zk原子广播和崩溃回复设计的一种协议</li>
+</ol>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/03/22/flink%E7%9A%84exactly-once/">
+                        <span class="hidden-mobile">flink的exactly-once</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+              <!-- Comments -->
+              <article class="comments" id="comments" lazyload>
+                
+                  
+                
+                
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-dark';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'leeseven-li/leeseven-li.github.io');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+              </article>
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

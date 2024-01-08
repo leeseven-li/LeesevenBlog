@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://leeseven-li.github.io/2024/01/08/2pc%20paxos%20zab/</loc>
+    <lastmod>2024-01-08</lastmod>
+  </url>
+  <url>
     <loc>https://leeseven-li.github.io/2022/03/22/flink%E7%9A%84exactly-once/</loc>
     <lastmod>2022-03-22</lastmod>
   </url>
