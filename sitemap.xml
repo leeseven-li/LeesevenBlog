@@ -2,6 +2,51 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://blog.leeseven.online/2023/02/18/hive%E7%BC%96%E8%AF%91%E5%AD%A6%E4%B9%A0/</loc>
+    
+    <lastmod>2024-01-08</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.leeseven.online/2023/01/08/hive%E5%BD%92%E6%A1%A3/</loc>
+    
+    <lastmod>2024-01-08</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.leeseven.online/2022/10/08/yarn%E5%85%AC%E5%B9%B3%E8%B0%83%E5%BA%A6%E5%92%8C%E5%AE%B9%E9%87%8F%E8%B0%83%E5%BA%A6/</loc>
+    
+    <lastmod>2024-01-08</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.leeseven.online/2024/01/08/hdfs%E9%80%8F%E6%98%8E%E6%95%B0%E6%8D%AE%E5%8A%A0%E5%AF%86/</loc>
+    
+    <lastmod>2024-01-08</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.leeseven.online/2022/06/08/hdfs%E6%95%B0%E6%8D%AE%E5%9C%A8%E8%AF%BB%E5%86%99%E6%97%B6%E5%80%99%E7%9A%84%E5%8F%AF%E8%A7%81%E6%80%A7/</loc>
+    
+    <lastmod>2024-01-08</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://blog.leeseven.online/2022/05/08/2pc%20paxos%20zab/</loc>
     
     <lastmod>2024-01-08</lastmod>
@@ -30,15 +75,6 @@
   
   <url>
     <loc>https://blog.leeseven.online/2022/03/10/hash%E7%AE%97%E6%B3%95%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95/</loc>
-    
-    <lastmod>2022-03-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://blog.leeseven.online/2022/03/10/hash%E7%AE%97%E6%B3%95/</loc>
     
     <lastmod>2022-03-10</lastmod>
     
@@ -171,6 +207,20 @@
   
   <url>
     <loc>https://blog.leeseven.online/tags/%E7%BC%96%E7%A0%81/</loc>
+    <lastmod>2024-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.leeseven.online/tags/hdf/</loc>
+    <lastmod>2024-01-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.leeseven.online/tags/yarn/</loc>
     <lastmod>2024-01-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

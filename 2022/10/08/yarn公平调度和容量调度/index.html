@@ -16,20 +16,21 @@
   <meta name="author" content="leeseven-li">
   <meta name="keywords" content="">
   
-    <meta name="description" content="2pc paxos zab2pc俩阶段提交协议，主要解决分布式事务一致性算法。  2：俩阶段 p：准备阶段 c：提交阶段  应用场景：关系型数据库事务实现、flink的checkpoint机制 2PC算法思路可以概括：参与者将操作成败通知协调者，再由协调者根据所有参与者的反馈情报决定各参与者是否需要操作还是中止事务。主要用来解决分布式事务的原子性问题，其中2阶段分为：准备阶段和提交阶段。 第一阶段">
+    <meta name="description" content="公平调度和容量调度max-min fairness share最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。 12345678资源总数&#x2F;用户数&#x3D;每个用户的平均资源1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务举个例子：总资源">
 <meta property="og:type" content="article">
-<meta property="og:title" content="2pc paxos zab">
-<meta property="og:url" content="https://blog.leeseven.online/2022/05/08/2pc%20paxos%20zab/index.html">
+<meta property="og:title" content="yarn公平调度和容量调度">
+<meta property="og:url" content="https://blog.leeseven.online/2022/10/08/yarn%E5%85%AC%E5%B9%B3%E8%B0%83%E5%BA%A6%E5%92%8C%E5%AE%B9%E9%87%8F%E8%B0%83%E5%BA%A6/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
-<meta property="og:description" content="2pc paxos zab2pc俩阶段提交协议，主要解决分布式事务一致性算法。  2：俩阶段 p：准备阶段 c：提交阶段  应用场景：关系型数据库事务实现、flink的checkpoint机制 2PC算法思路可以概括：参与者将操作成败通知协调者，再由协调者根据所有参与者的反馈情报决定各参与者是否需要操作还是中止事务。主要用来解决分布式事务的原子性问题，其中2阶段分为：准备阶段和提交阶段。 第一阶段">
+<meta property="og:description" content="公平调度和容量调度max-min fairness share最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。 12345678资源总数&#x2F;用户数&#x3D;每个用户的平均资源1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务举个例子：总资源">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-05-08T08:34:04.000Z">
-<meta property="article:modified_time" content="2024-01-08T08:46:49.032Z">
+<meta property="article:published_time" content="2022-10-08T03:55:21.000Z">
+<meta property="article:modified_time" content="2024-01-08T08:56:14.405Z">
 <meta property="article:author" content="leeseven-li">
+<meta property="article:tag" content="yarn">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>2pc paxos zab - 大数据/开源/分享</title>
+  <title>yarn公平调度和容量调度 - 大数据/开源/分享</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -175,7 +176,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="2pc paxos zab">
+            <span class="h2" id="subtitle" title="yarn公平调度和容量调度">
               
             </span>
 
@@ -185,8 +186,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2022-05-08 16:34" pubdate>
-        2022年5月8日 下午
+      <time datetime="2022-10-08 11:55" pubdate>
+        2022年10月8日 中午
       </time>
     </span>
   
@@ -196,7 +197,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.8k 字
+      1.9k 字
     </span>
   
 
@@ -234,82 +235,44 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">2pc paxos zab</h1>
+            <h1 style="display: none">yarn公平调度和容量调度</h1>
             
             <div class="markdown-body">
-              <h1 id="2pc-paxos-zab"><a href="#2pc-paxos-zab" class="headerlink" title="2pc paxos zab"></a>2pc paxos zab</h1><h2 id="2pc"><a href="#2pc" class="headerlink" title="2pc"></a>2pc</h2><p>俩阶段提交协议，主要解决分布式事务一致性算法。</p>
-<ul>
-<li>2：俩阶段</li>
-<li>p：准备阶段</li>
-<li>c：提交阶段</li>
-</ul>
-<p>应用场景：关系型数据库事务实现、flink的checkpoint机制</p>
-<p>2PC算法思路可以概括：参与者将操作成败通知协调者，再由协调者根据所有参与者的反馈情报决定各参与者是否需要操作还是中止事务。主要用来解决分布式事务的原子性问题，其中2阶段分为：准备阶段和提交阶段。</p>
-<p>第一阶段：准备阶段<br>事务协调者给每个参与者发送prepare消息，参与者有俩中情况可以返回，第一种可以直接返回失败；第二种是在本地执行事务，不提交，饭后返回成功。</p>
-<p>第二阶段：提交阶段<br>协调者收到参与者返回之后的消息，根据参与者返回的消息，确认本次操作每个参与者是提交还是中止</p>
-<h2 id="paxos"><a href="#paxos" class="headerlink" title="paxos"></a>paxos</h2><p>paxos是莱斯利兰伯特发明的一种分布式共识算法，是第一个有完整数学证明的共识算法。</p>
-<p>理解：paxos算法允许系统在出现网络分区，只要其中一个分区的节点个数保持过半，对外就能保证可用以及数据的最终一致性（最终所有节点拥有相同的更新），解决单点失败故障的同时，尽可能减少对吞吐量和延迟的影响。</p>
-<p>应用场景：选主、replication一致性</p>
-<p>proposer:提出者<br>acceptor:决策者<br>learner:学习者</p>
-<p>paxos类似于俩阶段提交，主要也是分为俩个阶段：prepare和accept，但是其实能算上一个阶段是增加了一个学习阶段</p>
-<p>第一阶段：propare阶段<br>proposer提出一个编号为N的提议并发给半数以上的acceptor，acceptor收到提议后有俩种情况。</p>
-<ol>
-<li>acceptor没有接受过提案，直接接受该编号N</li>
-<li>acceptor接受过提案N&#96;，那么就先判断编号跟N的大小关系：<ul>
-<li>N&#96; &gt; N 直接回复error</li>
-<li>N&#96; &lt; N 这时候还会有俩中情况，因为不确实是否已经确认accept已经accept某值<ul>
-<li>如果有，那么吧这个值返回给proposer</li>
-<li>如果没有，直接返回promise</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<p>第二阶段：接受阶段</p>
-<ol>
-<li>proposer:如果accept返回promise的消息里面没有任何value，那么就自己确定value去给超过半数的accept发送accept</li>
-<li>proposer:如果accept返回promise的消息里面有value，那么就取返回消息种最大编号N的value值作为本次accept发送的请求的value</li>
-<li>acceptor:只要没有收到过比proposer编号大的请求，那么就接受本次的请求</li>
-<li>acceptor:如果收到过比本次请求还打的编码，那么就会拒接本次请求</li>
-</ol>
-<p>第三阶段：学习阶段<br>只要某个提议本超过半数的acceptor接受，那么proposer就会发送消息到learner进行学习。</p>
-<h2 id="zab"><a href="#zab" class="headerlink" title="zab"></a>zab</h2><ul>
-<li>z:zookeeper</li>
-<li>a:atomic原子</li>
-<li>b:broadcast广播</li>
-</ul>
-<p>zab是zookeeper专门设计的一种奔溃回复的原子广播协议，是保证zookeeper一致性的核心算法。</p>
-<p>应用场景：负载均衡、协调通知、集群管理、选举、分布式锁、分布式队列</p>
-<ul>
-<li>消息广播</li>
-</ul>
-<ol>
-<li>客户端发送请求到zk集群，如果该节点是不是leader，那么该follower就会把请求转发给leader。</li>
-<li>leader收到请求之后会进行广播该请求，吧每个请求封装成一个事务，并分配一个zxid</li>
-<li>leader内部会为每个follower分配一个单独的队列，主要用来保证事务的顺序，然后吧本次事务放到队列里面</li>
-<li>follower收到leader发送的事务之后会把事务以日志的形式写入到磁盘，写入成功之后给leader发送ack响应</li>
-<li>leader收到半数的ack响应之后就会发送一个commit请求给所有的follower，follower收到之后对本地的事务进行提交</li>
-<li>leader上面也进行事务的提交</li>
-</ol>
-<ul>
-<li>崩溃恢复：选举leader 和 数据同步</li>
-</ul>
-<ol>
-<li>检测节点处于looking阶段，开始选举leader</li>
-<li>如果是新启动的集群那么每个节点都会投票给自己，初始值zxid为0，epoch是本地配置的节点id；如果是运行期间那么每个节点上面的zxid不再为0，发送自己已经到达的zxid</li>
-<li>最终获取半数以上同意有最新事务的作为本次选取的leader</li>
-<li>最后进行数据同步，有四种数据同步策略：差异化同步、先回滚再差异化同步、回滚同步、全量同步</li>
-</ol>
-<h2 id="paxos-和-zab"><a href="#paxos-和-zab" class="headerlink" title="paxos 和 zab"></a>paxos 和 zab</h2><ol>
-<li>paxos算法是用于构建一个分布式一致性状态机的，而zab主要用于构建一个分布式的主备系统</li>
-<li>paxos是一种通用的分布式共识算法，zab协议是专门为zk原子广播和崩溃回复设计的一种协议</li>
-</ol>
+              <h1 id="公平调度和容量调度"><a href="#公平调度和容量调度" class="headerlink" title="公平调度和容量调度"></a>公平调度和容量调度</h1><h2 id="max-min-fairness-share"><a href="#max-min-fairness-share" class="headerlink" title="max-min fairness share"></a>max-min fairness share</h2><p>最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><pre><code class="hljs routeros">资源总数/用户数=每个用户的平均资源<br>1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。<br>2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务<br>举个例子：<br>总资源：10 有4隔用户分别需求是：1 2 4 5<br>10/<span class="hljs-attribute">4</span>=2.5,每个用户分的平均资源是2.5<br>用户 1 2 都用不到2.5，他们分配的资源就是1+<span class="hljs-attribute">2</span>=3，身下2隔资源<br>用户3 4 的资源都不满足，所以2，2.5+2&gt;4,用户3可以满足，所以最后剩下的0.5+2.<span class="hljs-attribute">5</span>=3是用户4分的的资源<br></code></pre></td></tr></table></figure>
 
+<h2 id="调度算法DRF"><a href="#调度算法DRF" class="headerlink" title="调度算法DRF"></a>调度算法DRF</h2><p>dominant resource fairness:主要资源公平调度,主要是多种资源共同参与调度，不在是单一的内存、CPU、IO</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">拿一个yarn上面的任务距离：<br>系统拥有<span class="hljs-number"> 9 </span>CORE<span class="hljs-number"> 18 </span>MEMORY<br>A任务需要<span class="hljs-number"> 1 </span>CORE<span class="hljs-number"> 4 </span>MEMORY，1/9 &lt; 4/18，那么A任务的Dominant Resource就是MEMORY = 2/9<br>B任务需要<span class="hljs-number"> 3 </span>CORE<span class="hljs-number"> 1 </span>MEMORY，3/9 &gt; 1/18，那么B任务的Diminant Resource就是CORE = 3/9<br>想要公平的调度那么最好结果就是 A*3 + B*2 = (3+6)9 CORE (12+2)14MEMORY<br></code></pre></td></tr></table></figure>
+<p>分配步骤</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-number">1</span>、启动了一个A任务<br><span class="hljs-number">2</span>、<span class="hljs-number">2</span>/<span class="hljs-number">9</span> &gt; <span class="hljs-number">0</span>，所以下一个启动一个B任务<br><span class="hljs-number">3</span>、<span class="hljs-number">2</span><span class="hljs-regexp">/9 &lt; 1/</span><span class="hljs-number">3</span>,A的权重还是比B小，所以还是启动一个A任务<br><span class="hljs-number">4</span>、<span class="hljs-number">4</span><span class="hljs-regexp">/9 &gt; 1/</span><span class="hljs-number">3</span>,这时候A比B的权重大了，启动一个B任务<br><span class="hljs-number">5</span>、<span class="hljs-number">4</span><span class="hljs-regexp">/9 &lt; 2/</span><span class="hljs-number">3</span>,这时候B的权重大了，启动一个A任务<br><span class="hljs-number">6</span>、<span class="hljs-number">6</span><span class="hljs-regexp">/9 = 2/</span><span class="hljs-number">3</span>,这时候已经没有办法分配新任务了<br>整理的逻辑尽可能的根据主要的权重资源去分析占比，然后轮流去分配<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/40245793">https://zhuanlan.zhihu.com/p/40245793</a></p>
+</blockquote>
+<h2 id="公平调度策略"><a href="#公平调度策略" class="headerlink" title="公平调度策略"></a>公平调度策略</h2><p>这个调度策略旨在 队列 任务 容器 方面左到公平调度。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs">1、队列，资源分配的情况首先是队列之间的资源协调，每个平台上面可能会有多个队列，每个队列的使用情况可能不一样，所以如何选择队列去给这个队列分配资源就是在我们分配资源的第一步。<br>2、任务，这个是比队列更细的粒度。在队列里面有面临着多个任务的提交，这时候多个任务需要去在次队列里面去分配。<br>3、容器就是最小的资源粒度了。<br></code></pre></td></tr></table></figure>
+<p>公平调度的策略是应用在上面三个方面的分配的。每个阶段都是遵循着公平调度策列的。下面讲一下该策略</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">首先理解一下几个指标：<br>1、实际的最小资源份额：思考一下什么是一个队列和一个任务的实际的最小资源份额，每个队列和任务肯定是有自己需要的资源量的，拿一个任务来说，该任务所在的队列可能只有10 C<span class="hljs-number"> 40 </span>R,但是它需要的资源量是<span class="hljs-number"> 20 </span>C<span class="hljs-number"> 80 </span>R,计算这个任务的最小资源份额肯定是不能超过它所在的队列的，所以它最小的资源份额只能是10 C<span class="hljs-number"> 40 </span>R。<br>2、是否饥饿：如何判断这个任务是不是处于饥饿状态呢？还是继续用上面的例子，可能第一次分配得到的<span class="hljs-number"> 5 </span>C<span class="hljs-number"> 20 </span>R，但是该任务需要的最小资源是10 C<span class="hljs-number"> 40 </span>R，得到的资源没有满足最小的资源份额，可以判断这个任务就处于饥饿的状态。<br>3、资源分配比：相当于我实际使用资源跟我需要的资源对比，其实就是 资源的使用量/最小的资源份额。<br>4、资源使用权重比：资源使用量/权重<br></code></pre></td></tr></table></figure>
+<p>具体的资源分配流程</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs 1c">                        首先判断是否有队列/程序/container是否处于饥饿<br>                                               <span class="hljs-string">|</span><br>如果只有一个处于饥饿，那么肯定直接给这个分配资源 - - <span class="hljs-string">| - - 如果都不饥饿，根据资源使用权重比分配</span><br>                                               <span class="hljs-string">|</span><br>如果都处于饥饿，那么就按照资源的分配比来分配，资源分配比小，那就优先分配，相同的话就按照提交时间<br><br></code></pre></td></tr></table></figure>
+<p>这就是公平调度的策略</p>
+<p>##公平调度和容器调度<br>其实随着现在俩种调度器的互相借鉴，互补不足，俩种的功能越来越同质化。像hortonword默认使用的是容器调度，cloudera默认使用的是fair，目前高版本的hadoop默认使用的是capacity scheduler。像他们都是层级队列支持最大最小资源、资源抢占资源共享、不同的调度策略、支持优先级等。</p>
+<p>容器调度：共享集群</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs">1、支持给节点打标签，支持计算和存储分离<br>2、不同队列通过占比的方式配置<br></code></pre></td></tr></table></figure>
+
+<p>公平调度：公平调度</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs">1、队列内部支持FAIR（其实是最大最小化公平算法根据内存）的调度策略，容器调度里面没有<br>2、通过配置直接大小配置<br>3、限制每个用户的运行个数<br>4、支持为每个对垒设置不同的调度策略<br></code></pre></td></tr></table></figure>
             </div>
             <hr>
             <div>
               <div class="post-metas mb-3">
                 
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/yarn/">yarn</a>
+                    
+                  </div>
                 
               </div>
               
@@ -324,9 +287,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/06/08/hdfs%E6%95%B0%E6%8D%AE%E5%9C%A8%E8%AF%BB%E5%86%99%E6%97%B6%E5%80%99%E7%9A%84%E5%8F%AF%E8%A7%81%E6%80%A7/">
+                      <a href="/2023/01/08/hive%E5%BD%92%E6%A1%A3/">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">hdfs数据在读写时候的可见性</span>
+                        <span class="hidden-mobile">hive归档</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -334,8 +297,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/03/22/flink%E7%9A%84exactly-once/">
-                        <span class="hidden-mobile">flink的exactly-once</span>
+                      <a href="/2022/06/08/hdfs%E6%95%B0%E6%8D%AE%E5%9C%A8%E8%AF%BB%E5%86%99%E6%97%B6%E5%80%99%E7%9A%84%E5%8F%AF%E8%A7%81%E6%80%A7/">
+                        <span class="hidden-mobile">hdfs数据在读写时候的可见性</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

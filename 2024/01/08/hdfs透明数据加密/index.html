@@ -16,20 +16,23 @@
   <meta name="author" content="leeseven-li">
   <meta name="keywords" content="">
   
-    <meta name="description" content="hash算法和一致性hash算法hash表就是我们经常使用的map结构，给定一个key值，通过映射规则找到一个表中的位置来访问该元素，这样查找速度很快。映射规则就是散列函数，存放数据的叫散列表。最常用就是key进行hash取值，然后对表的长度进行取余。最后得到的就是散列表的位置。 HASHHash就是散列，给定任意长度的输入通过散列算法，变成固定长度的输出，得到散列值。这种转换其实是一个压缩映射，">
+    <meta name="description" content="HDFS透明数据加密为什么要使用HDFS数据加密和透明数据加密的应用场景常见的加密层级  应用层加密：应用程序加密是一种在应用程序层级进行的加密，可以为特定的应用程序提供定制化的加密保护。这种加密通常需要应用程序本身支持，例如使用加密算法对敏感数据进行加密，如密码和身份验证信息。 数据库层加密：数据库加密是一种在数据库层级进行的加密，可以保护数据库中的数据安全性。数据库加密通常包括列加密、行加密、">
 <meta property="og:type" content="article">
-<meta property="og:title" content="大数据&#x2F;开源&#x2F;分享">
-<meta property="og:url" content="https://blog.leeseven.online/2022/03/10/hash%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:title" content="hdfs透明数据加密">
+<meta property="og:url" content="https://blog.leeseven.online/2024/01/08/hdfs%E9%80%8F%E6%98%8E%E6%95%B0%E6%8D%AE%E5%8A%A0%E5%AF%86/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
-<meta property="og:description" content="hash算法和一致性hash算法hash表就是我们经常使用的map结构，给定一个key值，通过映射规则找到一个表中的位置来访问该元素，这样查找速度很快。映射规则就是散列函数，存放数据的叫散列表。最常用就是key进行hash取值，然后对表的长度进行取余。最后得到的就是散列表的位置。 HASHHash就是散列，给定任意长度的输入通过散列算法，变成固定长度的输出，得到散列值。这种转换其实是一个压缩映射，">
+<meta property="og:description" content="HDFS透明数据加密为什么要使用HDFS数据加密和透明数据加密的应用场景常见的加密层级  应用层加密：应用程序加密是一种在应用程序层级进行的加密，可以为特定的应用程序提供定制化的加密保护。这种加密通常需要应用程序本身支持，例如使用加密算法对敏感数据进行加密，如密码和身份验证信息。 数据库层加密：数据库加密是一种在数据库层级进行的加密，可以保护数据库中的数据安全性。数据库加密通常包括列加密、行加密、">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-03-10T06:23:17.749Z">
-<meta property="article:modified_time" content="2022-03-10T06:23:17.749Z">
+<meta property="og:image" content="https://blog.leeseven.online/img_1.png">
+<meta property="article:published_time" content="2024-01-08T08:52:48.000Z">
+<meta property="article:modified_time" content="2024-01-08T08:53:36.912Z">
 <meta property="article:author" content="leeseven-li">
+<meta property="article:tag" content="hdf">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog.leeseven.online/img_1.png">
   
   
-  <title>大数据/开源/分享</title>
+  <title>hdfs透明数据加密 - 大数据/开源/分享</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -175,7 +178,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="">
+            <span class="h2" id="subtitle" title="hdfs透明数据加密">
               
             </span>
 
@@ -185,8 +188,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2022-03-10 14:23" pubdate>
-        2022年3月10日 下午
+      <time datetime="2024-01-08 16:52" pubdate>
+        2024年1月8日 下午
       </time>
     </span>
   
@@ -196,7 +199,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.7k 字
+      2.4k 字
     </span>
   
 
@@ -205,7 +208,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      14 分钟
+      20 分钟
     </span>
   
 
@@ -234,38 +237,101 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none"></h1>
+            <h1 style="display: none">hdfs透明数据加密</h1>
             
             <div class="markdown-body">
-              <h1 id="hash算法和一致性hash算法"><a href="#hash算法和一致性hash算法" class="headerlink" title="hash算法和一致性hash算法"></a>hash算法和一致性hash算法</h1><p>hash表就是我们经常使用的map结构，给定一个key值，通过映射规则找到一个表中的位置来访问该元素，这样查找速度很快。映射规则就是散列函数，存放数据的叫<br>散列表。最常用就是key进行hash取值，然后对表的长度进行取余。最后得到的就是散列表的位置。</p>
-<h2 id="HASH"><a href="#HASH" class="headerlink" title="HASH"></a>HASH</h2><p>Hash就是散列，给定任意长度的输入通过散列算法，变成固定长度的输出，得到散列值。这种转换其实是一个压缩映射，散列值的空间通常会远小于输入的空间，不同<br>的输入可能会散列成相同的输出。常用于信息安全领域中的加密算法。</p>
-<p>我们使用数组：寻址容易，插入删除比较复杂。链表：插入删除简单，寻址困难。如果我们像实现一个查找和插入性能都比较好的数据结构呢？hash表就使这样一种算法。</p>
-<p>散列表通常是一个数组，数组里面使保存着一个指针，指针指向一个链表结构。这个链表就是为了保存相同hash值的输入。我们插入一个元素，首先对这个元素求散列<br>值，这个散列值就对应数组里面的index，通过index可以找到对应的链表，把这个元素放入到这个链表里面。</p>
-<p>散列值就是hash函数实现，求出这个散列值如何映射到数组中的index，下面介绍几种常用的方法</p>
+              <h1 id="HDFS透明数据加密"><a href="#HDFS透明数据加密" class="headerlink" title="HDFS透明数据加密"></a>HDFS透明数据加密</h1><h2 id="为什么要使用HDFS数据加密和透明数据加密的应用场景"><a href="#为什么要使用HDFS数据加密和透明数据加密的应用场景" class="headerlink" title="为什么要使用HDFS数据加密和透明数据加密的应用场景"></a>为什么要使用HDFS数据加密和透明数据加密的应用场景</h2><p>常见的加密层级</p>
+<ul>
+<li>应用层加密：应用程序加密是一种在应用程序层级进行的加密，可以为特定的应用程序提供定制化的加密保护。这种加密通常需要应用程序本身支持，例如使用加密算法对敏感数据进行加密，如密码和身份验证信息。</li>
+<li>数据库层加密：数据库加密是一种在数据库层级进行的加密，可以保护数据库中的数据安全性。数据库加密通常包括列加密、行加密、表空间加密等技术，可以为不同的数据提供不同的安全级别。</li>
+<li>文件系统层加密：文件系统加密是在文件系统层级进行的加密，通常是通过透明数据加密（TDE）或类似的技术实现的。文件系统加密可以保护数据在磁盘上的存储安全，以防止非授权访问和窃取数据。</li>
+<li>磁盘层加密：磁盘加密技术通过对整个磁盘或分区进行加密，可以防止未经授权的访问者读取或修改存储在磁盘上的数据。</li>
+<li>TLS&#x2F;SSL：传输层安全协议（TLS）或安全套接字层协议（SSL）是一种广泛用于保护数据传输安全的协议。TLS&#x2F;SSL提供了端到端的数据加密和身份验证功能，以防止数据在传输过程中被窃取或篡改。</li>
+</ul>
+<p>HDFS透明数据加密是在文件系统层级进行的加密，因此属于文件系统加密的范畴。它通过透明数据加密（TDE）技术，在不影响HDFS用户操作和应用程序的情况下，对存储在HDFS上的数据进行加密保护，以防止非授权访问和窃取数据。HDFS透明数据加密的加密层级与其他文件系统加密技术类似，例如，Linux文件系统的eCryptfs、Windows文件系统的BitLocker等。在文件系统层级使用加密技术可以保护存储在磁盘上的数据，在一定程度上提高数据的安全性和可靠性。</p>
+<p>HDFS加密可以防止在文件系统或之下的攻击，也叫操作系统级别的攻击（OS-level attacks）。操作系统和磁盘只能与加密的数据进行交互，因为数据已经被HDFS加密了。</p>
+<h2 id="什么是HDFS透明数据加密"><a href="#什么是HDFS透明数据加密" class="headerlink" title="什么是HDFS透明数据加密"></a>什么是HDFS透明数据加密</h2><p>首先理解一下透明的含义，透明是指加密和解密的过程对于应用程序和终端用户是透明的，不需要进行任何额外的操作。这是因为在透明数据加密中，加密和解密的过程是由系统自动完成的，应用程序只需要像平常一样读取或写入数据即可，数据在经过加密或解密后会被透明地传输给应用程序，使得应用程序无感知地使用加密数据。此外，加密和解密的密钥管理也是透明的，HDFS会自动管理密钥，不需要用户手动管理密钥。</p>
+<p>HDFS透明加密（Transparent Encryption）支持端到端的透明加密，启用以后，对于一些需要加密的HDFS目录里的文件可以实现透明的加密和解密，而不需要修改用户的业务代码。端到端是指加密和解密只能通过客户端。对于加密区域里的文件，HDFS保存的即是加密后的文件，文件加密的秘钥也是加密的。让非法用户即使从操作系统层面拷走文件，也是密文，没法查看。</p>
+<h2 id="HDFS透明数据加密的过程"><a href="#HDFS透明数据加密的过程" class="headerlink" title="HDFS透明数据加密的过程"></a>HDFS透明数据加密的过程</h2><ul>
+<li>EZ K（encryption zone key）：加密区域的秘钥，每创建一个HDFS的加密区域也即是一个目录就会生成一个，一般保存在后端的秘钥存储库中，比如数据库。</li>
+<li>DE K（data encryption key）：每个加密区域里的每个文件唯一的加密秘钥。</li>
+<li>EDE K（encrypted data encryption key）：每个加密区域里的每个文件唯一的加密秘钥，然后被EZ Key加密后的秘钥。保存在NameNode的元数据中。<br><img src="/img_1.png" srcset="/img/loading.gif" lazyload alt="img_1.png"></li>
+<li>KMS （Key Management Server）：是代表HDFS和客户端与后端的秘钥存储进行交互的代理服务。</li>
+</ul>
+<p>下面是写入加密数据的流程:</p>
 <ol>
-<li>除数散列法:这种就是我们熟知的 index &#x3D; hash值 % list.length</li>
-<li>平方散列法：index &#x3D; hash值 * hash值 &gt;&gt; 28</li>
-<li>斐波那契散列法：通过斐波那契数列找到一个理想的乘数 16（40503）、32（2654435769）、64（11400714819323198485）。index &#x3D; hash值 * 乘数 &gt;&gt; 28</li>
+<li>client向namenode发送请求创建加密文件</li>
+<li>namenode收到请求后向KMS请求EDEK</li>
+<li>KMS收到请求之后会根据文件所在目录的EZK生成一个EDEK</li>
+<li>把生成好的EDEK发送给namenode</li>
+<li>namenode收到EDEK会把EDEK存放到文件的元数据里面去</li>
+<li>namenode把EDEK发送给客户端</li>
+<li>客户端收到EDEK之后向KMS请求EDK</li>
+<li>KMS根据EDEK和文件所在目录的EZK生成一个DEK发送给客户端</li>
+<li>客户端根据EDK把文件加密发送到datanode上面</li>
 </ol>
-<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><p>还有一些优秀的算法升级，针对不同的问题我们可以采用不同的优化，如果我们有一组数据的hash碰撞比较多，那么对于碰撞到同一个index的元素就非常多，虽然能 很快定位到链表的位置，但是链表查找起来又比较费劲，这时候如何优化？</p>
-<p>d-left hashing就可以缓解上面出现的情况。d是多个的意思，意思是我们可以把hash表拆分成多个小的hash表。每个hash表都有自己的hash函数。d&#x3D;2的时候， 如果有一个值会求俩个hash值，然后分别去查找俩个hash表中对应index的链表元素，找到一个元素较小的进行存储。这样就可以加快查找速度，但是我们每次查找 的时候需要进行俩个hash值的计算，同事需要查找俩个链表的数据。</p>
-<h2 id="Blizzard-MPQ文件搜索算法"><a href="#Blizzard-MPQ文件搜索算法" class="headerlink" title="Blizzard MPQ文件搜索算法"></a>Blizzard MPQ文件搜索算法</h2><p>暴雪使用的hash算法更加精妙：hash表中不是用一个hash值来映射，而是用三个hash值来映射的。同时底层没有使用链表结构使用顺移的方法，如果当前index不存 在那就移动到下一个，直到把所有的都遍历过了，回到最初是的位置，没有的话就是没有。</p>
-<h2 id="一致性hash算法"><a href="#一致性hash算法" class="headerlink" title="一致性hash算法"></a>一致性hash算法</h2><p>一致性hash算法是为了解决hash算法局限性而出现的，它能够尽可能小的改变已经存在的服务器请求和处理请求服务器之间的映射关系。一致性hash算法解决了在分布式哈希表（Distribute Hash Table，DHT）中存在的动态伸缩等问题。</p>
-<h2 id="一致性hash算法和hash算法的关系"><a href="#一致性hash算法和hash算法的关系" class="headerlink" title="一致性hash算法和hash算法的关系"></a>一致性hash算法和hash算法的关系</h2><p>一致性hash算法是再哈希算法的基础之上提出的，在动态变化的分布式环境中，普通的hash不满足几个条件：平衡性、单调性、分散性。</p>
+<blockquote>
+<p>DEK是加解密一个文件的密匙，而KMS里存储的EZ key是用来加解密所有文件的密匙（DEK）的密匙。所以，EZ Key是更为重要的数据，只在KMS内部使用（DEK的加解密只在KMS内存进行），不会被传递到外面使用，而HDFS服务端只能接触到EDEK，所以HDFS服务端也不能解密加密区文件。目录下面还可以再次创建EZK,文件会找最近的EZK去生成EDEK.</p>
+</blockquote>
+<p>##HDFS透明数据加密支持的加密算法</p>
+<ul>
+<li>AES-256：一种高级加密标准，采用256位密钥进行加密和解密。</li>
+<li>AES-128：与AES-256相似，但使用128位密钥。</li>
+<li>RC4：一种流密码，使用可变长度的密钥进行加密和解密。</li>
+<li>DESede：一种基于DES（Data Encryption Standard）的加密算法，采用三个56位密钥进行加密和解密。<br>四种加密算法加密速度解密速度以及加密模式对比</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>加密算法</th>
+<th>加密速度</th>
+<th>解密速度</th>
+<th>加密模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AES-CT</td>
+<td>750.8</td>
+<td>831.1</td>
+<td>流加密</td>
+</tr>
+<tr>
+<td>AES-CBC</td>
+<td>244.3</td>
+<td>311.6</td>
+<td>分组加密</td>
+</tr>
+<tr>
+<td>3DES-CBC</td>
+<td>38.32</td>
+<td>43.18</td>
+<td>分组加密</td>
+</tr>
+<tr>
+<td>RC4</td>
+<td>766.9</td>
+<td>977.9</td>
+<td>流加密</td>
+</tr>
+</tbody></table>
+<p>HDFS中的透明数据加密（TDE）框架是可扩展的，可以支持其他的加密算法。要扩展加密算法，需要进行以下步骤：</p>
 <ol>
-<li>平衡性：hash的结果值应该平均分不到集群中各个机器上，实现机器的负载均衡。</li>
-<li>单调性：如果机器新增或者减少，不能影响已经存在的hash值，否则会影响服务的正常运行</li>
-<li>分散性：是指数据应该分散地存放在分布式中的各个节点中，不用每个借鉴全部保留。</li>
+<li>实现新的加密算法：实现一个新的加密算法，该算法必须实现Java加密扩展（Java Cryptography Extension，JCE）的密码接口，并且需要能够与Hadoop框架集成。</li>
+<li>将算法添加到HDFS的加密框架中：需要将新的加密算法添加到HDFS的加密框架中，这需要编辑Hadoop的配置文件（hadoop-common.xml和hdfs-site.xml）。</li>
 </ol>
-<p>一致性hash算法在增加减少机器的可以减少数据移动的开销，尽可能保持数据hash到的机器相同。</p>
-<p>如果部分节点中数据比较多，数据分布不均衡，会将这样的节点进行分裂，对原有的数据一份为二、不需要对全部的数据进行hash和划分。</p>
-<p>另外，这样在服务器少、分布不合理的时候，还是会出现某些节点的压力比较大的情况，那么就需要虚拟节点的出现，我们可以对机器分别取不同的hash值，使数据尽<br>可能的分散，来实现负载均衡。</p>
 
             </div>
             <hr>
             <div>
               <div class="post-metas mb-3">
                 
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/hdf/">hdf</a>
+                    
+                  </div>
                 
               </div>
               
@@ -280,18 +346,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/03/14/flink%E7%9A%84checkpint%E6%9C%BA%E5%88%B6%E5%AD%A6%E4%B9%A0/">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">flink的checkpint机制学习</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/03/10/hash%E7%AE%97%E6%B3%95%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95/">
-                        <span class="hidden-mobile">hash算法和一致性hash算法</span>
+                      <a href="/2023/02/18/hive%E7%BC%96%E8%AF%91%E5%AD%A6%E4%B9%A0/">
+                        <span class="hidden-mobile">hive编译学习</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

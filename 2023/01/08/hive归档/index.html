@@ -1,0 +1,528 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="leeseven-li">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="学习hive归档使用文本文件存储测试构建文本测试数据创建一个分区表和一个没有分区的表 123456789create table A(    id int,    name string)partitioned by (dt string);create table B(    id int,    name string); 构建测试数据 123456--往A表里面插入俩条数据，也就是俩个小文件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hive归档">
+<meta property="og:url" content="https://blog.leeseven.online/2023/01/08/hive%E5%BD%92%E6%A1%A3/index.html">
+<meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
+<meta property="og:description" content="学习hive归档使用文本文件存储测试构建文本测试数据创建一个分区表和一个没有分区的表 123456789create table A(    id int,    name string)partitioned by (dt string);create table B(    id int,    name string); 构建测试数据 123456--往A表里面插入俩条数据，也就是俩个小文件">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-01-08T08:58:06.000Z">
+<meta property="article:modified_time" content="2024-01-08T08:59:00.291Z">
+<meta property="article:author" content="leeseven-li">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>hive归档 - 大数据/开源/分享</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"blog.leeseven.online","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Leeseven&#39;s 博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/hy.jpeg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="hive归档">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2023-01-08 16:58" pubdate>
+        2023年1月8日 下午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      6.4k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      54 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">hive归档</h1>
+            
+            <div class="markdown-body">
+              <h1 id="学习hive归档使用"><a href="#学习hive归档使用" class="headerlink" title="学习hive归档使用"></a>学习hive归档使用</h1><h2 id="文本文件存储测试"><a href="#文本文件存储测试" class="headerlink" title="文本文件存储测试"></a>文本文件存储测试</h2><h3 id="构建文本测试数据"><a href="#构建文本测试数据" class="headerlink" title="构建文本测试数据"></a>构建文本测试数据</h3><p>创建一个分区表和一个没有分区的表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> A(<br>    id <span class="hljs-type">int</span>,<br>    name string<br>)partitioned <span class="hljs-keyword">by</span> (dt string);<br><br><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> B(<br>    id <span class="hljs-type">int</span>,<br>    name string<br>);<br></code></pre></td></tr></table></figure>
+<p>构建测试数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">--往A表里面插入俩条数据，也就是俩个小文件</span><br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">table</span> A <span class="hljs-keyword">partition</span>(dt<span class="hljs-operator">=</span><span class="hljs-string">&#x27;20210101&#x27;</span>) <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;lee&#x27;</span>);<br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">table</span> A <span class="hljs-keyword">partition</span>(dt<span class="hljs-operator">=</span><span class="hljs-string">&#x27;20210101&#x27;</span>) <span class="hljs-keyword">values</span>(<span class="hljs-number">2</span>,<span class="hljs-string">&#x27;leo&#x27;</span>);<br><span class="hljs-comment">--往B表里面插入俩条数据，也就是俩个小文件</span><br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">table</span> B <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;lee&#x27;</span>);<br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">table</span> B <span class="hljs-keyword">values</span>(<span class="hljs-number">2</span>,<span class="hljs-string">&#x27;leo&#x27;</span>);<br></code></pre></td></tr></table></figure>
+<p>查看测试数据</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs awk">hdfs dfs -ls <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>b<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive          <span class="hljs-number">6</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">09</span>:<span class="hljs-number">10</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>b/<span class="hljs-number">000000</span>_0<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive          <span class="hljs-number">6</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">09</span>:<span class="hljs-number">10</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>b/<span class="hljs-number">000000</span>_0_copy_1<br><br>hdfs dfs -ls <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a/dt=<span class="hljs-number">20210101</span><br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive          <span class="hljs-number">6</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">09</span>:<span class="hljs-number">09</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive          <span class="hljs-number">6</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">09</span>:<span class="hljs-number">09</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0_copy_1<br></code></pre></td></tr></table></figure>
+<p>启用archive</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-built_in">set</span> hive.archive.<span class="hljs-attribute">enabled</span>=<span class="hljs-literal">true</span>;<br><span class="hljs-built_in">set</span> hive.archive.har.parentdir.<span class="hljs-attribute">settable</span>=<span class="hljs-literal">true</span>;<br><span class="hljs-built_in">set</span> har.partfile.<span class="hljs-attribute">size</span>=1099511627776;<br></code></pre></td></tr></table></figure>
+<p>测试归档分区表</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc">ALTER TABLE A ARCHIVE PARTITION(dt=<span class="hljs-emphasis">&#x27;20210101&#x27;</span>);<br>执行成功，查看执行结果<br><span class="hljs-section">select * from a;</span><br><span class="hljs-section">+-------+---------+-----------+</span><br><span class="hljs-section">| a.id  | a.name  |   a.dt    |</span><br><span class="hljs-section">+-------+---------+-----------+</span><br>| 2     | leo     | 20210101  |<br><span class="hljs-section">| 1     | lee     | 20210101  |</span><br><span class="hljs-section">+-------+---------+-----------+</span><br>归档的文件可以正常执行，查看文件信息<br>hdfs dfs -ls /user/hive/warehouse/a/dt=20210101<br>drwxrwx--x+  - hive hive          0 2021-05-11 09:16 /user/hive/warehouse/a/dt=20210101/data.har<br>变成了正常hdfs归档的文件<br></code></pre></td></tr></table></figure>
+<p>测试归档无分区的表</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs subunit">ALTER TABLE B ARCHIVE;<br><span class="hljs-keyword">Error: </span>Error while compiling statement: FAILED: SemanticException [Error 10110]: ARCHIVE can only be run on partitions (state=42000,code=10110)<br>不支持非分区表的归档<br></code></pre></td></tr></table></figure>
+<p>测试插入数据</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">table</span> A <span class="hljs-keyword">partition</span>(dt=<span class="hljs-string">&#x27;20210101&#x27;</span>) <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;lee&#x27;</span>);<br>Error: Error <span class="hljs-keyword">while</span> compiling <span class="hljs-keyword">statement</span>: FAILED: SemanticException <span class="hljs-keyword">Insert</span> <span class="hljs-keyword">conflict</span> <span class="hljs-keyword">with</span> existing archive: dt=<span class="hljs-number">20210101</span> (state=<span class="hljs-number">42000</span>,code=<span class="hljs-number">40000</span>)<br>不支持往归档里面插入数据<br></code></pre></td></tr></table></figure>
+<p>解归档插入数据</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs awk">ALTER TABLE A UNARCHIVE PARTITION(dt=<span class="hljs-string">&#x27;20210101&#x27;</span>);<br>INFO  : Compiling command(queryId=hive_20210511101147_9129e779-eaeb-<span class="hljs-number">402</span>c-b43e-dfb6f3df8afa): ALTER TABLE A UNARCHIVE PARTITION(dt=<span class="hljs-string">&#x27;20210101&#x27;</span>)<br>INFO  : Semantic Analysis Completed<br>INFO  : Returning Hive schema: Schema(fieldSchemas:null, properties:null)<br>INFO  : Completed compiling command(queryId=hive_20210511101147_9129e779-eaeb-<span class="hljs-number">402</span>c-b43e-dfb6f3df8afa); Time taken: <span class="hljs-number">0.337</span> seconds<br>INFO  : Executing command(queryId=hive_20210511101147_9129e779-eaeb-<span class="hljs-number">402</span>c-b43e-dfb6f3df8afa): ALTER TABLE A UNARCHIVE PARTITION(dt=<span class="hljs-string">&#x27;20210101&#x27;</span>)<br>INFO  : Starting task [Stage-<span class="hljs-number">0</span>:DDL] <span class="hljs-keyword">in</span> serial mode<br>INFO  : Copying har:<span class="hljs-regexp">//</span>hdfs-nameservice1<span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span>data.har to hdfs:<span class="hljs-regexp">//</span>nameservice1<span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span>.hive-staging_hive_2021-<span class="hljs-number">05</span>-<span class="hljs-number">11</span>_10-<span class="hljs-number">11</span>-<span class="hljs-number">47</span>_922_5507670282318603233-<span class="hljs-number">620</span>/-ext-<span class="hljs-number">10000</span><br>INFO  : Succefully Copied har:<span class="hljs-regexp">//</span>hdfs-nameservice1<span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span>data.har to hdfs:<span class="hljs-regexp">//</span>nameservice1<span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span>.hive-staging_hive_2021-<span class="hljs-number">05</span>-<span class="hljs-number">11</span>_10-<span class="hljs-number">11</span>-<span class="hljs-number">47</span>_922_5507670282318603233-<span class="hljs-number">620</span>/-ext-<span class="hljs-number">10000</span><br>INFO  : Moving hdfs:<span class="hljs-regexp">//</span>nameservice1<span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span>.hive-staging_hive_2021-<span class="hljs-number">05</span>-<span class="hljs-number">11</span>_10-<span class="hljs-number">11</span>-<span class="hljs-number">47</span>_922_5507670282318603233-<span class="hljs-number">620</span><span class="hljs-regexp">/-ext-10000 to hdfs:/</span><span class="hljs-regexp">/nameservice1/u</span>ser<span class="hljs-regexp">/hive/</span>warehouse<span class="hljs-regexp">/a/</span>dt=<span class="hljs-number">20210101</span>_INTERMEDIATE_EXTRACTED<br>INFO  : Moving hdfs:<span class="hljs-regexp">//</span>nameservice1<span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101 to hdfs:/</span><span class="hljs-regexp">/nameservice1/u</span>ser<span class="hljs-regexp">/hive/</span>warehouse<span class="hljs-regexp">/a/</span>dt=<span class="hljs-number">20210101</span>_INTERMEDIATE_ARCHIVED<br>INFO  : Moving hdfs:<span class="hljs-regexp">//</span>nameservice1<span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101_INTERMEDIATE_EXTRACTED to hdfs:/</span><span class="hljs-regexp">/nameservice1/u</span>ser<span class="hljs-regexp">/hive/</span>warehouse<span class="hljs-regexp">/a/</span>dt=<span class="hljs-number">20210101</span><br>INFO  : Completed executing command(queryId=hive_20210511101147_9129e779-eaeb-<span class="hljs-number">402</span>c-b43e-dfb6f3df8afa); Time taken: <span class="hljs-number">0.241</span> seconds<br>INFO  : OK<br>No rows affected (<span class="hljs-number">0.599</span> seconds)<br>可以插入成功<br>insert into table A partition(dt=<span class="hljs-string">&#x27;20210101&#x27;</span>) values(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;lee&#x27;</span>);<br>查看文件<br>hdfs dfs -ls <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a/dt=<span class="hljs-number">20210101</span><br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive          <span class="hljs-number">6</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">10</span>:<span class="hljs-number">11</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive          <span class="hljs-number">6</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">10</span>:<span class="hljs-number">11</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0_copy_1<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive          <span class="hljs-number">6</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">10</span>:<span class="hljs-number">13</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0_copy_2<br></code></pre></td></tr></table></figure>
+
+<p>##parquet构建<br>###构建parquet测试数据</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> A(<br>    id <span class="hljs-type">int</span>,<br>    <span class="hljs-type">name</span> string<br>)partitioned <span class="hljs-keyword">by</span> (dt string)<br>stored <span class="hljs-keyword">as</span> parquet;<br><br><span class="hljs-comment">--往A表里面插入俩条数据，也就是俩个小文件</span><br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">table</span> A <span class="hljs-keyword">partition</span>(dt=<span class="hljs-string">&#x27;20210101&#x27;</span>) <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;lee&#x27;</span>);<br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">table</span> A <span class="hljs-keyword">partition</span>(dt=<span class="hljs-string">&#x27;20210101&#x27;</span>) <span class="hljs-keyword">values</span>(<span class="hljs-number">2</span>,<span class="hljs-string">&#x27;leo&#x27;</span>);<br><span class="hljs-comment">--往B表里面插入俩条数据，也就是俩个小文件</span><br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">table</span> B <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;lee&#x27;</span>);<br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">table</span> B <span class="hljs-keyword">values</span>(<span class="hljs-number">2</span>,<span class="hljs-string">&#x27;leo&#x27;</span>);<br></code></pre></td></tr></table></figure>
+<p>查看文件</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs awk">hdfs dfs -ls <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a/dt=<span class="hljs-number">20210101</span><br>Found <span class="hljs-number">2</span> items<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive        <span class="hljs-number">410</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">11</span>:<span class="hljs-number">31</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive        <span class="hljs-number">410</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">11</span>:<span class="hljs-number">31</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0_copy_1<br><br>hdfs dfs -ls <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>b<br>Found <span class="hljs-number">2</span> items<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive        <span class="hljs-number">410</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">11</span>:<span class="hljs-number">31</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>b/<span class="hljs-number">000000</span>_0<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive        <span class="hljs-number">410</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">11</span>:<span class="hljs-number">31</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>b/<span class="hljs-number">000000</span>_0_copy_1<br></code></pre></td></tr></table></figure>
+<p>执行归档命令</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs gradle">set hive.archive.enabled=<span class="hljs-keyword">true</span>;<br>set hive.archive.har.parentdir.settable=<span class="hljs-keyword">true</span>;<br>set har.partfile.<span class="hljs-keyword">size</span>=<span class="hljs-number">1099511627776</span>;<br><br>ALTER TABLE A ARCHIVE PARTITION(dt=<span class="hljs-string">&#x27;20210101&#x27;</span>);<br>select * <span class="hljs-keyword">from</span> a;<br>+-------+---------+-----------+<br>| a.id  | a.name  |   a.dt    |<br>+-------+---------+-----------+<br>| <span class="hljs-number">2</span>     | leo     | <span class="hljs-number">20210101</span>  |<br>| <span class="hljs-number">1</span>     | lee     | <span class="hljs-number">20210101</span>  |<br>+-------+---------+-----------+<br><span class="hljs-number">2</span> rows selected (<span class="hljs-number">0.475</span> seconds)<br><br>查看文件<br>hdfs dfs -ls <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a/dt=<span class="hljs-number">20210101</span><br>Found <span class="hljs-number">1</span> items<br>drwxrwx--x+  - hive hive          <span class="hljs-number">0</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">13</span>:<span class="hljs-number">58</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span>data.har<br><br>插入数据<br>insert <span class="hljs-keyword">into</span> table A partition(dt=<span class="hljs-string">&#x27;20210101&#x27;</span>) values(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;lee&#x27;</span>);<br>Error: Error <span class="hljs-keyword">while</span> compiling statement: FAILED: SemanticException Insert conflict with existing archive: dt=<span class="hljs-number">20210101</span> (state=<span class="hljs-number">42000</span>,code=<span class="hljs-number">40000</span>)<br><br>执行解归档<br>ALTER TABLE A UNARCHIVE PARTITION(dt=<span class="hljs-string">&#x27;20210101&#x27;</span>);<br><br>查看文件<br>hdfs dfs -ls <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a/dt=<span class="hljs-number">20210101</span><br>Found <span class="hljs-number">3</span> items<br>drwxrwx--x+  - hive hive          <span class="hljs-number">0</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">14</span>:<span class="hljs-number">01</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span>.hive-staging_hive_2021-<span class="hljs-number">05</span>-<span class="hljs-number">11</span>_13-<span class="hljs-number">58</span>-<span class="hljs-number">09</span>_515_6677546453372938669-<span class="hljs-number">627</span><br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive        <span class="hljs-number">410</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">14</span>:<span class="hljs-number">01</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive        <span class="hljs-number">410</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">14</span>:<span class="hljs-number">01</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0_copy_<br><br>执行插入可以正常插入<br>insert <span class="hljs-keyword">into</span> table A partition(dt=<span class="hljs-string">&#x27;20210101&#x27;</span>) values(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;lee&#x27;</span>);<br>select * <span class="hljs-keyword">from</span> a;<br> <br>hdfs dfs -ls <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a/dt=<span class="hljs-number">20210101</span><br>Found <span class="hljs-number">4</span> items<br>drwxrwx--x+  - hive hive          <span class="hljs-number">0</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">14</span>:<span class="hljs-number">01</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span>.hive-staging_hive_2021-<span class="hljs-number">05</span>-<span class="hljs-number">11</span>_13-<span class="hljs-number">58</span>-<span class="hljs-number">09</span>_515_6677546453372938669-<span class="hljs-number">627</span><br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive        <span class="hljs-number">410</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">14</span>:<span class="hljs-number">01</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive        <span class="hljs-number">410</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">14</span>:<span class="hljs-number">01</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0_copy_1<br>-rwxrwx--x+  <span class="hljs-number">3</span> hive hive        <span class="hljs-number">410</span> <span class="hljs-number">2021</span>-<span class="hljs-number">05</span>-<span class="hljs-number">11</span> <span class="hljs-number">14</span>:<span class="hljs-number">02</span> <span class="hljs-regexp">/user/</span>hive<span class="hljs-regexp">/warehouse/</span>a<span class="hljs-regexp">/dt=20210101/</span><span class="hljs-number">000000</span>_0_copy_2<br></code></pre></td></tr></table></figure>
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/02/18/hive%E7%BC%96%E8%AF%91%E5%AD%A6%E4%B9%A0/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">hive编译学习</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/10/08/yarn%E5%85%AC%E5%B9%B3%E8%B0%83%E5%BA%A6%E5%92%8C%E5%AE%B9%E9%87%8F%E8%B0%83%E5%BA%A6/">
+                        <span class="hidden-mobile">yarn公平调度和容量调度</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+              <!-- Comments -->
+              <article class="comments" id="comments" lazyload>
+                
+                  
+                
+                
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-dark';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'leeseven-li/leeseven-li.github.io');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+              </article>
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

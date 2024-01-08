@@ -1,0 +1,560 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=dark>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="leeseven-li">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="hive的编译与执行我们简单理解hive，就是把一个sql解析成mr任务发送给hadoop去执行。 hql –&gt; parse –&gt; ast –&gt; semanticAnalyzer –&gt; logical plan –&gt; opreator tree –&gt; logical optimizer –&gt; operator tree –&gt; physical pla">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hive编译学习">
+<meta property="og:url" content="https://blog.leeseven.online/2023/02/18/hive%E7%BC%96%E8%AF%91%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
+<meta property="og:description" content="hive的编译与执行我们简单理解hive，就是把一个sql解析成mr任务发送给hadoop去执行。 hql –&gt; parse –&gt; ast –&gt; semanticAnalyzer –&gt; logical plan –&gt; opreator tree –&gt; logical optimizer –&gt; operator tree –&gt; physical pla">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-02-17T22:59:34.000Z">
+<meta property="article:modified_time" content="2024-01-08T09:00:20.788Z">
+<meta property="article:author" content="leeseven-li">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  <title>hive编译学习 - 大数据/开源/分享</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"blog.leeseven.online","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Leeseven&#39;s 博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/hy.jpeg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="hive编译学习">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2023-02-18 06:59" pubdate>
+        2023年2月18日 早上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      10k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      86 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">hive编译学习</h1>
+            
+            <div class="markdown-body">
+              <h1 id="hive的编译与执行"><a href="#hive的编译与执行" class="headerlink" title="hive的编译与执行"></a>hive的编译与执行</h1><p>我们简单理解hive，就是把一个sql解析成mr任务发送给hadoop去执行。</p>
+<p>hql –&gt; parse –&gt; ast –&gt; semanticAnalyzer –&gt; logical plan –&gt; opreator tree –&gt; logical optimizer –&gt; operator tree –&gt; physical plan –&gt; task tree –&gt; physical optimizer –&gt; task tree</p>
+<h2 id="sql-转换成语法树"><a href="#sql-转换成语法树" class="headerlink" title="sql 转换成语法树"></a>sql 转换成语法树</h2><p>我们提交一条sql，driver收到之后进入到编译阶段，需要把sql转换成语法树<br>通过创建对象 ParseDriver 然后调用的 parse(command,ctx)方法把 sql语句转换成 ast 抽象语法树</p>
+<figure class="highlight java"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment">   * Compile a new query, but potentially reset taskID counter.  Not resetting task counter</span><br><span class="hljs-comment">   * is useful for generating re-entrant QL queries.</span><br><span class="hljs-comment">   * <span class="hljs-doctag">@param</span> command  The HiveQL query to compile</span><br><span class="hljs-comment">   * <span class="hljs-doctag">@param</span> resetTaskIds Resets taskID counter if true.</span><br><span class="hljs-comment">   * <span class="hljs-doctag">@return</span> 0 for ok</span><br><span class="hljs-comment">   */</span><br>  <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">compile</span><span class="hljs-params">(String command, <span class="hljs-type">boolean</span> resetTaskIds)</span>&#123;<br>        PerfLogger perfLogger=PerfLogger.getPerfLogger();<br>        perfLogger.PerfLogBegin(CLASS_NAME,PerfLogger.COMPILE);<br>        <span class="hljs-comment">//holder for parent command type/string when executing reentrant queries</span><br>        QueryState queryState=<span class="hljs-keyword">new</span> <span class="hljs-title class_">QueryState</span>();<br>        ...<br>        <span class="hljs-type">ParseDriver</span> <span class="hljs-variable">pd</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ParseDriver</span>();<br>        <span class="hljs-comment">//解析语法树</span><br>        <span class="hljs-type">ASTNode</span> <span class="hljs-variable">tree</span> <span class="hljs-operator">=</span> pd.parse(command, ctx);<br>  &#125;<br></code></pre></td></tr></table></figure>
+<p>接下来让我们看一下parse如何实现的，sql语句如何变成ast，ast到底是什么？<br>进入方法看一看，将进入方法第一步手心拿到了lexer</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> ASTNode <span class="hljs-title function_">parse</span><span class="hljs-params">(String command, Context ctx, <span class="hljs-type">boolean</span> setTokenRewriteStream)</span> <br>      <span class="hljs-keyword">throws</span> ParseException &#123;<br>    LOG.info(<span class="hljs-string">&quot;Parsing command: &quot;</span> + command);<br><br>    <span class="hljs-comment">//ANTLRNoCaseStringStream</span><br>    <span class="hljs-type">HiveLexerX</span> <span class="hljs-variable">lexer</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">HiveLexerX</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">ANTLRNoCaseStringStream</span>(command));<br>    <span class="hljs-type">TokenRewriteStream</span> <span class="hljs-variable">tokens</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">TokenRewriteStream</span>(lexer);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>ANTLRNoCaseStringStream这个类是用来做什么？看到antlr很熟悉，学习一下</p>
+<blockquote>
+<p>ANTLR（全名：ANother Tool for Language Recognition）是基于LL(<em>)算法实现的语法解析器生成器（parser generator），用Java语言编写，使用自上而下（top-down）的递归下降LL剖析器方法。由旧金山大学的Terence Parr博士等人于1989年开始发展。如同一般的词法分析器（lexer）和语法分析器（parser），ANTLR可以用来产生树状分析器（tree parsers）。ANTLR 文法定义使用类似EBNF（Extended Backus-Naur Form）的定义方式，形象十分简洁直观。例如: ANTLR用A : a;来表示规则，旧式的方法则是以 A&#x3D;&gt;a 表示，所以ANTLR是以“:”代替了“&#x3D;&gt;”。ANTLR的规则要以分号“;”结束。又如其他ANTLR符号“|”代表“或”的关系，又如“</em>，+”表示可以出现0次或多次。目前Hibernate与WebLogic都是使用ANTLR做为来解析HQL。在NetBeans IDE中更以ANTLR解析C++。Twitter搜索使用ANTLR解析，一天超过200亿次查询。</p>
+</blockquote>
+<p>ANTLRNoCaseStringStream这个把所有字符转化成了大写,HiveLexerX 这是是用来做词法分析，语法分析通过TokenRewriteStream拿到所有tokens(tokens是不可分割的一个个单词)</p>
+<p>接下来就要进行语法解析</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">/构造hive parser<br>    HiveParser parser = <span class="hljs-keyword">new</span> <span class="hljs-constructor">HiveParser(<span class="hljs-params">tokens</span>)</span>;<br>    <span class="hljs-keyword">if</span> (ctx != null) &#123;<br>      parser.set<span class="hljs-constructor">HiveConf(<span class="hljs-params">ctx</span>.<span class="hljs-params">getConf</span>()</span>);<br>    &#125;<br>    parser.set<span class="hljs-constructor">TreeAdaptor(<span class="hljs-params">adaptor</span>)</span>;<br>    <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">HiveParser</span>.</span></span>statement_return r = null;<br>    <span class="hljs-keyword">try</span> &#123;<br>      r = parser.statement<span class="hljs-literal">()</span>;<br>    &#125; catch (RecognitionException e) &#123;<br>      e.print<span class="hljs-constructor">StackTrace()</span>;<br>      throw <span class="hljs-keyword">new</span> <span class="hljs-constructor">ParseException(<span class="hljs-params">parser</span>.<span class="hljs-params">errors</span>)</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">if</span> (lexer.get<span class="hljs-constructor">Errors()</span>.size<span class="hljs-literal">()</span><span class="hljs-operator"> == </span><span class="hljs-number">0</span><span class="hljs-operator"> &amp;&amp; </span>parser.errors.size<span class="hljs-literal">()</span><span class="hljs-operator"> == </span><span class="hljs-number">0</span>) &#123;<br>      <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LOG</span>.</span></span>info(<span class="hljs-string">&quot;Parse Completed&quot;</span>);<br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (lexer.get<span class="hljs-constructor">Errors()</span>.size<span class="hljs-literal">()</span> != <span class="hljs-number">0</span>) &#123;<br>      throw <span class="hljs-keyword">new</span> <span class="hljs-constructor">ParseException(<span class="hljs-params">lexer</span>.<span class="hljs-params">getErrors</span>()</span>);<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>      throw <span class="hljs-keyword">new</span> <span class="hljs-constructor">ParseException(<span class="hljs-params">parser</span>.<span class="hljs-params">errors</span>)</span>;<br>    &#125;<br><br>    ASTNode tree = (ASTNode) r.get<span class="hljs-constructor">Tree()</span>;<br><br></code></pre></td></tr></table></figure>
+<p>首先通过上述tokens 构造了 HiveParser对象<br>执行parser 得到了返回值，看到最后的代码  r.getTree()就是我们要求的语法树<br>针对parse来说，语义语法都是我们事先定义好的，通过antlr最终把一个sql转化成了抽象语法树语法树</p>
+<p>##抽象语法树 –&gt; 逻辑执行计划<br>语法树想要变成执行计划，首先要把抽象语法树变成一个 query block</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">BaseSemanticAnalyzer sem = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">SemanticAnalyzerFactory</span>.</span></span>get(conf, tree);<br><br>     <span class="hljs-comment">// Do semantic analysis and plan generation</span><br>     <span class="hljs-keyword">if</span> (saHooks != null) &#123;<br>       HiveSemanticAnalyzerHookContext hookCtx = <span class="hljs-keyword">new</span> <span class="hljs-constructor">HiveSemanticAnalyzerHookContextImpl()</span>;<br>       hookCtx.set<span class="hljs-constructor">Conf(<span class="hljs-params">conf</span>)</span>;<br>       hookCtx.set<span class="hljs-constructor">UserName(<span class="hljs-params">userName</span>)</span>;<br>       hookCtx.set<span class="hljs-constructor">IpAddress(SessionState.<span class="hljs-params">get</span>()</span>.get<span class="hljs-constructor">UserIpAddress()</span>);<br>       hookCtx.set<span class="hljs-constructor">Command(<span class="hljs-params">command</span>)</span>;<br>       <span class="hljs-keyword">for</span> (HiveSemanticAnalyzerHook hook : saHooks) &#123;<br>         <span class="hljs-comment">//经过分析hook之后</span><br>         tree = hook.pre<span class="hljs-constructor">Analyze(<span class="hljs-params">hookCtx</span>, <span class="hljs-params">tree</span>)</span>;<br>       &#125;<br>       <span class="hljs-comment">//最后的处理逻辑</span><br>       sem.analyze(tree, ctx);<br>       hookCtx.update(sem);<br>       <span class="hljs-keyword">for</span> (HiveSemanticAnalyzerHook hook : saHooks) &#123;<br>         hook.post<span class="hljs-constructor">Analyze(<span class="hljs-params">hookCtx</span>, <span class="hljs-params">sem</span>.<span class="hljs-params">getRootTasks</span>()</span>);<br>       &#125;<br>     &#125; <span class="hljs-keyword">else</span> &#123;<br>       <span class="hljs-comment">//最后的处理逻辑</span><br>       sem.analyze(tree, ctx);<br>     &#125;<br></code></pre></td></tr></table></figure>
+<p>从上面可以看出，通过语义分析器 SemanticAnalyzer 来对 逻辑语法树进行分析，接下来我们看如果分析的</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs scss">public void <span class="hljs-built_in">analyze</span>(ASTNode ast, Context ctx) throws SemanticException &#123;<br>    <span class="hljs-comment">//初始化上下文</span><br>    <span class="hljs-built_in">initCtx</span>(ctx);<br>    <span class="hljs-comment">//进行分析前的一些初始化</span><br>    <span class="hljs-built_in">init</span>(true);<br>    <span class="hljs-comment">//解析语法树核心方法</span><br>    <span class="hljs-built_in">analyzeInternal</span>(ast);<br>  &#125;<br></code></pre></td></tr></table></figure>
+<p>首先看一下init方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">init</span><span class="hljs-params">(<span class="hljs-type">boolean</span> clearPartsCache)</span> &#123;<br>   <span class="hljs-comment">// clear most members</span><br>   <span class="hljs-comment">//这一步 清理了一些成员变量，置为空</span><br>   reset(clearPartsCache);<br>   <span class="hljs-comment">// init</span><br>   <span class="hljs-comment">//创建了 query block对象</span><br>   <span class="hljs-type">QB</span> <span class="hljs-variable">qb</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">QB</span>(<span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>, <span class="hljs-literal">false</span>);<br>   <span class="hljs-built_in">this</span>.qb = qb;<br> &#125;<br></code></pre></td></tr></table></figure>
+<p>创建好了 qb ，后续分析的时候会使用到，接下来看分析 analyzeInternal(ast)</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-comment">// 1. Generate Resolved Parse tree from syntax tree</span><br>   <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LOG</span>.</span></span>info(<span class="hljs-string">&quot;Starting Semantic Analysis&quot;</span>);<br>   <span class="hljs-keyword">if</span> (!gen<span class="hljs-constructor">ResolvedParseTree(<span class="hljs-params">ast</span>, <span class="hljs-params">plannerCtx</span>)</span>) &#123;<br>     return;<br>   &#125;<br></code></pre></td></tr></table></figure>
+<p>从抽象语法树生成解析树，进入方法查看如何从抽象语法树生成解析树</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">private <span class="hljs-type">void</span> processPositionAlias(ASTNode ast) throws SemanticException &#123;<br>    <span class="hljs-type">boolean</span> isByPos = <span class="hljs-keyword">false</span>;<br>    //查看配置是否开启hive别名<br>    <span class="hljs-keyword">if</span> (HiveConf.getBoolVar(conf,<br>          HiveConf.ConfVars.HIVE_GROUPBY_ORDERBY_POSITION_ALIAS) == <span class="hljs-keyword">true</span>) &#123;<br>      isByPos = <span class="hljs-keyword">true</span>;<br>    &#125;<br><br>   <br>    <span class="hljs-type">boolean</span> isAllCol;<br>    ASTNode selectNode = <span class="hljs-keyword">null</span>;<br>    ASTNode groupbyNode = <span class="hljs-keyword">null</span>;<br>    ASTNode orderbyNode = <span class="hljs-keyword">null</span>;<br><br>    // <span class="hljs-keyword">get</span> node <span class="hljs-keyword">type</span><br>    //每个节点上面可能会出现  <span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> <span class="hljs-built_in">table_name</span> <span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> <span class="hljs-number">1</span> <span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> <span class="hljs-number">1</span><br>    //所以可能会出现  令牌为 <span class="hljs-keyword">select</span>  <span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> <span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span>的三种情况<br>    <span class="hljs-type">int</span> child_count = ast.getChildCount();<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> child_pos = <span class="hljs-number">0</span>; child_pos &lt; child_count; ++child_pos) &#123;<br>      ASTNode node = (ASTNode) ast.getChild(child_pos);<br>      <span class="hljs-type">int</span> <span class="hljs-keyword">type</span> = node.getToken().getType();<br>      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">type</span> == HiveParser.TOK_SELECT) &#123;<br>        selectNode = node;<br>      &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">type</span> == HiveParser.TOK_GROUPBY) &#123;<br>        groupbyNode = node;<br>      &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">type</span> == HiveParser.TOK_ORDERBY) &#123;<br>        orderbyNode = node;<br>      &#125;<br>    &#125;<br>    //然后去分析处理三种情况，<br>    <span class="hljs-keyword">if</span> (selectNode != <span class="hljs-keyword">null</span>) &#123;<br>      <span class="hljs-type">int</span> selectExpCnt = selectNode.getChildCount();<br><br>      // replace <span class="hljs-keyword">each</span> <span class="hljs-keyword">of</span> the position <span class="hljs-keyword">alias</span> <span class="hljs-keyword">in</span> GROUPBY <span class="hljs-keyword">with</span> the actual <span class="hljs-keyword">column</span> <span class="hljs-type">name</span><br>      <span class="hljs-keyword">if</span> (groupbyNode != <span class="hljs-keyword">null</span>) &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> child_pos = <span class="hljs-number">0</span>; child_pos &lt; groupbyNode.getChildCount(); ++child_pos) &#123;<br>          ASTNode node = (ASTNode) groupbyNode.getChild(child_pos);<br>          <span class="hljs-keyword">if</span> (node.getToken().getType() == HiveParser.Number) &#123;<br>            //必须开启响应的参数<br>            <span class="hljs-keyword">if</span> (isByPos) &#123;<br>              。。。<br>            &#125; <span class="hljs-keyword">else</span> &#123;<br>              warn(&quot;Using constant number  &quot; + node.getText() +<br>                &quot; in group by. If you try to use position alias when hive.groupby.orderby.position.alias is false, the position alias will be ignored.&quot;);<br>            &#125;<br>          &#125;<br>        &#125;<br>      &#125;<br><br>      // replace <span class="hljs-keyword">each</span> <span class="hljs-keyword">of</span> the position <span class="hljs-keyword">alias</span> <span class="hljs-keyword">in</span> ORDERBY <span class="hljs-keyword">with</span> the actual <span class="hljs-keyword">column</span> <span class="hljs-type">name</span><br>      <span class="hljs-keyword">if</span> (orderbyNode != <span class="hljs-keyword">null</span>) &#123;<br>        isAllCol = <span class="hljs-keyword">false</span>;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> child_pos = <span class="hljs-number">0</span>; child_pos &lt; selectNode.getChildCount(); ++child_pos) &#123;<br>          ASTNode node = (ASTNode) selectNode.getChild(child_pos).getChild(<span class="hljs-number">0</span>);<br>          <span class="hljs-keyword">if</span> (node.getToken().getType() == HiveParser.TOK_ALLCOLREF) &#123;<br>            isAllCol = <span class="hljs-keyword">true</span>;<br>          &#125;<br>        &#125;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> child_pos = <span class="hljs-number">0</span>; child_pos &lt; orderbyNode.getChildCount(); ++child_pos) &#123;<br>          ASTNode colNode = (ASTNode) orderbyNode.getChild(child_pos);<br>          ASTNode node = (ASTNode) colNode.getChild(<span class="hljs-number">0</span>);<br>          <span class="hljs-keyword">if</span> (node.getToken().getType() == HiveParser.Number) &#123;<br>            <span class="hljs-keyword">if</span>( isByPos ) &#123;<br>              <span class="hljs-keyword">if</span> (!isAllCol) &#123;<br>                。。。<br>              &#125;<br>            &#125; <span class="hljs-keyword">else</span> &#123; //<span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">using</span> position <span class="hljs-keyword">alias</span> <span class="hljs-keyword">and</span> it <span class="hljs-keyword">is</span> a number.<br>              warn(&quot;Using constant number &quot; + node.getText() +<br>                &quot; in order by. If you try to use position alias when hive.groupby.orderby.position.alias is false, the position alias will be ignored.&quot;);<br>            &#125;<br>          &#125;<br>        &#125;<br>      &#125;<br>    &#125;<br><br>    //递归处理处理所有子节点<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> child_pos = <span class="hljs-number">0</span>; child_pos &lt; child_count; ++child_pos) &#123;<br>      processPositionAlias((ASTNode) ast.getChild(child_pos));<br>    &#125;<br>    <span class="hljs-keyword">return</span>;<br>  &#125;<br></code></pre></td></tr></table></figure>
+<p>从上面可以看出，第一步首先分析语法树中的别名，并且进行处理</p>
+<blockquote>
+<p>hive.groupby.orderby.position.alias 这个是针对 group by  order by 别名的配置，可以使用select * from table_name group by 1 order by 1<br>这样的  1需要替换成对应的列</p>
+</blockquote>
+<p>分析完这个查看是否是创建表</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs kotlin"><span class="hljs-comment">// 2. analyze create table command</span><br><span class="hljs-keyword">if</span> (ast.getToken().getType() == HiveParser.TOK_CREATETABLE) &#123;<br>  <span class="hljs-comment">// if it is not CTAS, we don&#x27;t need to go further and just return</span><br>  <span class="hljs-keyword">if</span> ((child =X, plannerCtx)) == <span class="hljs-literal">null</span>) &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>  &#125;<br>&#125; <span class="hljs-keyword">else</span> &#123;<br>  SessionState.<span class="hljs-keyword">get</span>().setCommandType(HiveOperation.QUERY);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>如果是创建表的命令，去进行响应的解析，如果不是创建表就是query</p>
+<blockquote>
+<p>分析create table命令。如果它是常规的create-table或类似于create-table的语句，我们将创建一个DDLWork并返回true。如果它是一个create-table-as-select，<br>我们将获取必要的信息（例如SerDe和Storage Format）并将其放入QB中，然后返回false，这表明语义分析器的其余部分需要处理select语句。到SerDe和存储格式。</p>
+</blockquote>
+<p>接下来分析是不是创建视图</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-comment">// 3. analyze create view command</span><br>    <span class="hljs-keyword">if</span> (ast.get<span class="hljs-constructor">Token()</span>.get<span class="hljs-constructor">Type()</span><span class="hljs-operator"> == </span>HiveParser.TOK_CREATEVIEW<span class="hljs-operator"></span><br><span class="hljs-operator">        || </span>(ast.get<span class="hljs-constructor">Token()</span>.get<span class="hljs-constructor">Type()</span><span class="hljs-operator"> == </span>HiveParser.TOK_ALTERVIEW<span class="hljs-operator"> &amp;&amp; </span>ast.get<span class="hljs-constructor">Child(1)</span>.get<span class="hljs-constructor">Type()</span><span class="hljs-operator"> == </span>HiveParser.TOK_QUERY)) &#123;<br>      child = analyze<span class="hljs-constructor">CreateView(<span class="hljs-params">ast</span>, <span class="hljs-params">qb</span>)</span>;<br>      <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">SessionState</span>.</span></span>get<span class="hljs-literal">()</span>.set<span class="hljs-constructor">CommandType(HiveOperation.CREATEVIEW)</span>;<br>      <span class="hljs-keyword">if</span> (child<span class="hljs-operator"> == </span>null) &#123;<br>        return <span class="hljs-literal">false</span>;<br>      &#125;<br>      viewSelect = child;<br>      <span class="hljs-comment">// prevent view from referencing itself</span><br>      viewsExpanded.add(createVwDesc.get<span class="hljs-constructor">ViewName()</span>);<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p>分析完视图进行查询相关的解析</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">Phase1Ctx ctx_1 = init<span class="hljs-constructor">Phase1Ctx()</span>;<br>   <br>   pre<span class="hljs-constructor">ProcessForInsert(<span class="hljs-params">child</span>, <span class="hljs-params">qb</span>)</span>;<br>   <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">do</span><span class="hljs-constructor">Phase1(<span class="hljs-params">child</span>, <span class="hljs-params">qb</span>, <span class="hljs-params">ctx_1</span>, <span class="hljs-params">plannerCtx</span>)</span>) &#123;<br>     <span class="hljs-comment">// if phase1Result false return</span><br>     return <span class="hljs-literal">false</span>;<br>   &#125;<br>   <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LOG</span>.</span></span>info(<span class="hljs-string">&quot;Completed phase 1 of Semantic Analysis&quot;</span>);<br><br>   <span class="hljs-comment">// 5. Resolve Parse Tree</span><br>   get<span class="hljs-constructor">MetaData(<span class="hljs-params">qb</span>)</span>;<br>   <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LOG</span>.</span></span>info(<span class="hljs-string">&quot;Completed getting MetaData in Semantic Analysis&quot;</span>);<br><br>   plannerCtx.set<span class="hljs-constructor">ParseTreeAttr(<span class="hljs-params">child</span>, <span class="hljs-params">ctx_1</span>)</span>;<br><br>   return <span class="hljs-literal">true</span>;<br></code></pre></td></tr></table></figure>
+
+<p>看到上面的代码，通过preProcessForInsert 分析是不是insert，然后处理。 doPhase1进行后续所有节点的分析,然后获取元数据。生成queryBolck完成，<br>抽象语法树生辰解析树也就完成</p>
+<blockquote>
+<p>段1 ：（包括但不限于）：1.获取所有表&#x2F;子查询的所有别名，并在aliasToTabs，aliasToSubq中进行适当的映射。<br>2.获取目标的位置并命名子句“ inclause” + i<br>3.从聚合树的字符串表示形式到实际聚合AST创建映射。<br>4.在destToSelExpr中创建从子句名称到选择表达式AST的映射。<br>5.在aliasToLateralViews中创建从表别名到侧面视图AST的映射。</p>
+</blockquote>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-comment">// 2. Gen OP Tree from resolved Parse Tree</span><br>   Operator sinkOp = gen<span class="hljs-constructor">OPTree(<span class="hljs-params">ast</span>, <span class="hljs-params">plannerCtx</span>)</span>;<br></code></pre></td></tr></table></figure>
+<p>通过调用genOPTree生成逻辑执行计划 Operator （待研究）,然后推断结果的schema</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-comment">// 3. Deduce Resultset Schema</span><br>   <span class="hljs-keyword">if</span> (createVwDesc != null) &#123;<br>     resultSchema = convert<span class="hljs-constructor">RowSchemaToViewSchema(<span class="hljs-params">opParseCtx</span>.<span class="hljs-params">get</span>(<span class="hljs-params">sinkOp</span>)</span>.get<span class="hljs-constructor">RowResolver()</span>);<br>   &#125; <span class="hljs-keyword">else</span> &#123;<br>     resultSchema = convert<span class="hljs-constructor">RowSchemaToResultSetSchema(<span class="hljs-params">opParseCtx</span>.<span class="hljs-params">get</span>(<span class="hljs-params">sinkOp</span>)</span>.get<span class="hljs-constructor">RowResolver()</span>,<br>         <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">HiveConf</span>.</span></span>get<span class="hljs-constructor">BoolVar(<span class="hljs-params">conf</span>, HiveConf.ConfVars.HIVE_RESULTSET_USE_UNIQUE_COLUMN_NAMES)</span>);<br>   &#125;<br></code></pre></td></tr></table></figure>
+<p>然后为优化器和物理编译器生成解析上下文</p>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">copyInfoToQueryProperties(queryProperties)<span class="hljs-comment">;</span><br>   ParseContext pCtx = <span class="hljs-keyword">new</span> ParseContext(conf, opToPartPruner, opToPartList, topOps,<br>       <span class="hljs-keyword">new</span> HashSet&lt;JoinOperator&gt;(joinContext.keySet()),<br>       <span class="hljs-keyword">new</span> HashSet&lt;SMBMapJoinOperator&gt;(smbMapJoinContext.keySet()),<br><span class="hljs-built_in">       loadTableWork,</span> loadFileWork, ctx, idToTableNameMap, destTableId, uCtx,<br><span class="hljs-built_in">       listMapJoinOpsNoReducer,</span> prunedPartitions, opToSamplePruner,<br><span class="hljs-built_in">       globalLimitCtx,</span> nameToSplitSample, inputs, rootTasks, opToPartToSkewedPruner,<br><span class="hljs-built_in">       viewAliasToInput,</span> reduceSinkOperatorsAddedByEnforceBucketingSorting,<br><span class="hljs-built_in">       analyzeRewrite,</span> tableDesc, queryProperties)<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+<p>然后执行逻辑优化器</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-keyword">if</span> (<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LOG</span>.</span></span>is<span class="hljs-constructor">DebugEnabled()</span>) &#123;<br>     <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LOG</span>.</span></span>debug(<span class="hljs-string">&quot;Before logical optimization\n&quot;</span> + <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Operator</span>.</span></span><span class="hljs-keyword">to</span><span class="hljs-constructor">String(<span class="hljs-params">pCtx</span>.<span class="hljs-params">getTopOps</span>()</span>.values<span class="hljs-literal">()</span>));<br>   &#125;<br>   Optimizer optm = <span class="hljs-keyword">new</span> <span class="hljs-constructor">Optimizer()</span>;<br>   optm.set<span class="hljs-constructor">Pctx(<span class="hljs-params">pCtx</span>)</span>;<br>   optm.initialize(conf);<br>   pCtx = optm.optimize<span class="hljs-literal">()</span>;<br>   FetchTask origFetchTask = pCtx.get<span class="hljs-constructor">FetchTask()</span>;<br>   <span class="hljs-keyword">if</span> (<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LOG</span>.</span></span>is<span class="hljs-constructor">DebugEnabled()</span>) &#123;<br>     <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LOG</span>.</span></span>debug(<span class="hljs-string">&quot;After logical optimization\n&quot;</span> + <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Operator</span>.</span></span><span class="hljs-keyword">to</span><span class="hljs-constructor">String(<span class="hljs-params">pCtx</span>.<span class="hljs-params">getTopOps</span>()</span>.values<span class="hljs-literal">()</span>));<br>   &#125;<br></code></pre></td></tr></table></figure>
+<p>优化物理操作并转化为固定执行引擎</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-keyword">if</span> (!ctx.get<span class="hljs-constructor">ExplainLogical()</span>) &#123;<br>      TaskCompiler compiler = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">TaskCompilerFactory</span>.</span></span>get<span class="hljs-constructor">Compiler(<span class="hljs-params">conf</span>, <span class="hljs-params">pCtx</span>)</span>;<br>      compiler.init(conf, console, db);<br>      compiler.compile(pCtx, rootTasks, inputs, outputs);<br>      fetchTask = pCtx.get<span class="hljs-constructor">FetchTask()</span>;<br>    &#125;<br>    <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">LOG</span>.</span></span>info(<span class="hljs-string">&quot;Completed plan generation&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/08/hdfs%E9%80%8F%E6%98%8E%E6%95%B0%E6%8D%AE%E5%8A%A0%E5%AF%86/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">hdfs透明数据加密</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/01/08/hive%E5%BD%92%E6%A1%A3/">
+                        <span class="hidden-mobile">hive归档</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+              <!-- Comments -->
+              <article class="comments" id="comments" lazyload>
+                
+                  
+                
+                
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#comments', function() {
+      var light = 'github-dark';
+      var dark = 'github-dark';
+      var schema = document.documentElement.getAttribute('data-user-color-scheme');
+      if (schema === 'dark') {
+        schema = dark;
+      } else {
+        schema = light;
+      }
+      window.UtterancesThemeLight = light;
+      window.UtterancesThemeDark = dark;
+      var s = document.createElement('script');
+      s.setAttribute('src', 'https://utteranc.es/client.js');
+      s.setAttribute('repo', 'leeseven-li/leeseven-li.github.io');
+      s.setAttribute('issue-term', 'pathname');
+      
+      s.setAttribute('label', 'utterances');
+      
+      s.setAttribute('theme', schema);
+      s.setAttribute('crossorigin', 'anonymous');
+      document.getElementById('comments').appendChild(s);
+    })
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+              </article>
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> <i class="iconfont icon-love"></i> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
