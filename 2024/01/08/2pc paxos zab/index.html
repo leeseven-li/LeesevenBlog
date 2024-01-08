@@ -19,7 +19,7 @@
     <meta name="description" content="2pc paxos zab2pc俩阶段提交协议，主要解决分布式事务一致性算法。  2：俩阶段 p：准备阶段 c：提交阶段  应用场景：关系型数据库事务实现、flink的checkpoint机制 2PC算法思路可以概括：参与者将操作成败通知协调者，再由协调者根据所有参与者的反馈情报决定各参与者是否需要操作还是中止事务。主要用来解决分布式事务的原子性问题，其中2阶段分为：准备阶段和提交阶段。 第一阶段">
 <meta property="og:type" content="article">
 <meta property="og:title" content="zab">
-<meta property="og:url" content="https://leeseven-li.github.io/2024/01/08/2pc%20paxos%20zab/index.html">
+<meta property="og:url" content="https://blog.leeseven.online/2024/01/08/2pc%20paxos%20zab/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
 <meta property="og:description" content="2pc paxos zab2pc俩阶段提交协议，主要解决分布式事务一致性算法。  2：俩阶段 p：准备阶段 c：提交阶段  应用场景：关系型数据库事务实现、flink的checkpoint机制 2PC算法思路可以概括：参与者将操作成败通知协调者，再由协调者根据所有参与者的反馈情报决定各参与者是否需要操作还是中止事务。主要用来解决分布式事务的原子性问题，其中2阶段分为：准备阶段和提交阶段。 第一阶段">
 <meta property="og:locale" content="zh_CN">
@@ -66,7 +66,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"leeseven-li.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.leeseven.online","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>

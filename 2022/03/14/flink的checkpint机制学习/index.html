@@ -19,7 +19,7 @@
     <meta name="description" content="flink分布式快照(Checkpoint)实现精确一次处理语义有俩种方式：1、分布式快照&#x2F;状态检查点 2、至少一次事件传递以及重复数据删除机制  Exactly-Once并不是字面意思，一条数据被精确的处理一次，而是保证sink端的数据只执行了一次完成的事务。说白了就是有效一次：可以保证引擎 管理的状态只提交一次到持久化后端  Chandy-Lamport 算法核心思想：通过每个节点记">
 <meta property="og:type" content="article">
 <meta property="og:title" content="flink的checkpint机制学习">
-<meta property="og:url" content="https://leeseven-li.github.io/2022/03/14/flink%E7%9A%84checkpint%E6%9C%BA%E5%88%B6%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:url" content="https://blog.leeseven.online/2022/03/14/flink%E7%9A%84checkpint%E6%9C%BA%E5%88%B6%E5%AD%A6%E4%B9%A0/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
 <meta property="og:description" content="flink分布式快照(Checkpoint)实现精确一次处理语义有俩种方式：1、分布式快照&#x2F;状态检查点 2、至少一次事件传递以及重复数据删除机制  Exactly-Once并不是字面意思，一条数据被精确的处理一次，而是保证sink端的数据只执行了一次完成的事务。说白了就是有效一次：可以保证引擎 管理的状态只提交一次到持久化后端  Chandy-Lamport 算法核心思想：通过每个节点记">
 <meta property="og:locale" content="zh_CN">
@@ -67,7 +67,7 @@
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"leeseven-li.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.leeseven.online","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
