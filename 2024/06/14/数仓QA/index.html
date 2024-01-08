@@ -16,21 +16,20 @@
   <meta name="author" content="leeseven-li">
   <meta name="keywords" content="">
   
-    <meta name="description" content="公平调度和容量调度max-min fairness share最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。 12345678资源总数&#x2F;用户数&#x3D;每个用户的平均资源1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务举个例子：总资源">
+    <meta name="description" content="数仓问题总结从零建设一个数仓 建设一个数仓首先是要有一个目标，支持哪些业务类型的分析，支持哪些决策，数据的输出方面有了大方向； 有了目标，就需要对公司的业务进行调研，有哪些业务，有哪些需求，公司目前有哪些数据； 针对数据的输入，业务调研，数据的应用有了了解，应该就开始进行了技术选型了，首先对于原始数据的采集以及分析组件定下来； 数据分析人员提炼数据模型，划分数据主题，进行数据的整体规划； 有了数据">
 <meta property="og:type" content="article">
-<meta property="og:title" content="yarn公平调度和容量调度">
-<meta property="og:url" content="https://blog.leeseven.online/2022/10/08/yarn%E5%85%AC%E5%B9%B3%E8%B0%83%E5%BA%A6%E5%92%8C%E5%AE%B9%E9%87%8F%E8%B0%83%E5%BA%A6/index.html">
+<meta property="og:title" content="数仓QA">
+<meta property="og:url" content="https://blog.leeseven.online/2024/06/14/%E6%95%B0%E4%BB%93QA/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
-<meta property="og:description" content="公平调度和容量调度max-min fairness share最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。 12345678资源总数&#x2F;用户数&#x3D;每个用户的平均资源1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务举个例子：总资源">
+<meta property="og:description" content="数仓问题总结从零建设一个数仓 建设一个数仓首先是要有一个目标，支持哪些业务类型的分析，支持哪些决策，数据的输出方面有了大方向； 有了目标，就需要对公司的业务进行调研，有哪些业务，有哪些需求，公司目前有哪些数据； 针对数据的输入，业务调研，数据的应用有了了解，应该就开始进行了技术选型了，首先对于原始数据的采集以及分析组件定下来； 数据分析人员提炼数据模型，划分数据主题，进行数据的整体规划； 有了数据">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-10-08T03:55:21.000Z">
-<meta property="article:modified_time" content="2024-01-08T09:01:04.924Z">
+<meta property="article:published_time" content="2024-06-14T14:09:15.000Z">
+<meta property="article:modified_time" content="2024-01-08T09:09:41.388Z">
 <meta property="article:author" content="leeseven-li">
-<meta property="article:tag" content="yarn">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>yarn公平调度和容量调度 - 大数据/开源/分享</title>
+  <title>数仓QA - 大数据/开源/分享</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -176,7 +175,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="yarn公平调度和容量调度">
+            <span class="h2" id="subtitle" title="数仓QA">
               
             </span>
 
@@ -186,8 +185,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2022-10-08 11:55" pubdate>
-        2022年10月8日 中午
+      <time datetime="2024-06-14 22:09" pubdate>
+        2024年6月14日 晚上
       </time>
     </span>
   
@@ -197,7 +196,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.9k 字
+      2.6k 字
     </span>
   
 
@@ -206,7 +205,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      16 分钟
+      22 分钟
     </span>
   
 
@@ -235,44 +234,79 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">yarn公平调度和容量调度</h1>
+            <h1 style="display: none">数仓QA</h1>
             
             <div class="markdown-body">
-              <h1 id="公平调度和容量调度"><a href="#公平调度和容量调度" class="headerlink" title="公平调度和容量调度"></a>公平调度和容量调度</h1><h2 id="max-min-fairness-share"><a href="#max-min-fairness-share" class="headerlink" title="max-min fairness share"></a>max-min fairness share</h2><p>最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。</p>
-<figure class="highlight routeros"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><pre><code class="hljs routeros">资源总数/用户数=每个用户的平均资源<br>1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。<br>2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务<br>举个例子：<br>总资源：10 有4隔用户分别需求是：1 2 4 5<br>10/<span class="hljs-attribute">4</span>=2.5,每个用户分的平均资源是2.5<br>用户 1 2 都用不到2.5，他们分配的资源就是1+<span class="hljs-attribute">2</span>=3，身下2隔资源<br>用户3 4 的资源都不满足，所以2，2.5+2&gt;4,用户3可以满足，所以最后剩下的0.5+2.<span class="hljs-attribute">5</span>=3是用户4分的的资源<br></code></pre></td></tr></table></figure>
+              <h1 id="数仓问题总结"><a href="#数仓问题总结" class="headerlink" title="数仓问题总结"></a>数仓问题总结</h1><h2 id="从零建设一个数仓"><a href="#从零建设一个数仓" class="headerlink" title="从零建设一个数仓"></a>从零建设一个数仓</h2><ol>
+<li>建设一个数仓首先是要有一个目标，支持哪些业务类型的分析，支持哪些决策，数据的输出方面有了大方向；</li>
+<li>有了目标，就需要对公司的业务进行调研，有哪些业务，有哪些需求，公司目前有哪些数据；</li>
+<li>针对数据的输入，业务调研，数据的应用有了了解，应该就开始进行了技术选型了，首先对于原始数据的采集以及分析组件定下来；</li>
+<li>数据分析人员提炼数据模型，划分数据主题，进行数据的整体规划；</li>
+<li>有了数据模型，还需要定制我们数仓的整体规范像命名规范、开发规范、流程规范，因为本上仓库仓库的只有有合理规范存储起来的数据才能算的上是仓库，只是把数据放到一个地方那可能叫垃圾站。数据规范的同时也需要对整体数仓进行分层。</li>
+</ol>
+<h2 id="数据仓库中最重要的是什么"><a href="#数据仓库中最重要的是什么" class="headerlink" title="数据仓库中最重要的是什么"></a>数据仓库中最重要的是什么</h2><p>其实都挺重要的，如果说最重要的话，我认位是数据质量和数据标准。数据质量是保证数据的完整性、准确性、及时性、一致性的，我们做数仓的目标是什么是为了支撑公司重大决策，如果数据的质量都不能保证那么最终的结果也就不能保证。数据标准这个是我自己做了这几年自己任务比较重要的一个，数据标准其实就是数据的规范，从数据的采集，数据的处理，数据的输出，以及命名规范、开发规范、流程规范等，如果真正想让数据发挥它自己的价值，那么他的数据接入以及输出场景肯定是比较多的，而且对接的部门业务也是特别多的，如果没有吧数仓的标准固定好，那么不同的人不同的业务以及不同的需求可能都有自己个性化的东西，开发效率肯定是跟不上去，而且成本肯定是特别高的，有了好的数据标准，可以解决很多问题，不知道你有没有接触过银行的传统数仓，他们银行原来基于TD做的那一套数仓，数据标准都是特别统计的，包括命名以及码值等，其他银行的标准都是一样的，包括银行的7大主题，相当于行业内都有固定的统一标准，不管是跟业务部门还是其他银行对接业务，沟通和效率上面都是特别高效。</p>
+<h2 id="为什么要分层"><a href="#为什么要分层" class="headerlink" title="为什么要分层"></a>为什么要分层</h2><ol>
+<li>通过数据的分层简化数据的清理流程，让数据更加清楚，逻辑更加清楚，开发效率可以得到一定的提升，如果数据出现问题，对于问题的定位也就更加的简单。</li>
+<li>通过数据的分层增加了数据的冗余，数据冗余的同时其实代表每层数据的可用性，减少了数据重复处理的次数，这样就是典型的使用空间换时间，因为大数据想对于空间更加廉价，减少了重复处理数据带来的内存以及cpu消耗。</li>
+<li>其实数据分层本是一种高效的数据组织形式，通过数据的分层我们可以更好的发挥数据的集成价值，同时发汇历史数据的价值。</li>
+</ol>
+<h1 id="数仓知识"><a href="#数仓知识" class="headerlink" title="数仓知识"></a>数仓知识</h1><h2 id="传统数据库和数据仓库"><a href="#传统数据库和数据仓库" class="headerlink" title="传统数据库和数据仓库"></a>传统数据库和数据仓库</h2><ul>
+<li>应用方面<br>传统数据库主要是存储实时数据，面向事务的。数据仓库主要是存储历史数据，进行数据分析挖掘，是面向分析的。</li>
+<li>数据方面<br>传统数据库存储的数据量较少、数据冗余少，数据范围较小数据仓库存储的数据量很大，数据冗余度搞，数据历史数据很全，同时数据范围大，可能不光包含数据库中的数据还包括日志、埋点等数据。</li>
+<li>建模方面<br>传统数据库一般是满足第三范式要求，通过规范化的主外键设计减少数据的冗余，同时保证数据的完整性。数据仓库一般采用维度建模，主要的还是提升查询性能，不符合三范式的要求。</li>
+</ul>
+<h2 id="数仓如何分层"><a href="#数仓如何分层" class="headerlink" title="数仓如何分层"></a>数仓如何分层</h2><p>数据接入层-&gt;公共数据层-&gt;数据应用层</p>
+<ol>
+<li>数据接入层operation data source</li>
+</ol>
+<ul>
+<li>数据接入层是,主要存放的是贴源数据，跟源系统数据保持一直，数据分为离线数据和实时数据，没有经过复杂的逻辑处理。</li>
+</ul>
+<ol start="2">
+<li>公共数据层common data model</li>
+</ol>
+<ul>
+<li>dim公共维度层:目的就是抽取公共模型层的公用维度，建立整个数仓的一致性维度，降低数据计算口径和算法的不统一风险。</li>
+<li>dwd明细粒度事实层：以业务过程作为建模驱动法，构建最细粒度的明细表，再设计的时候通常还会考虑冗余一些常用的维度来也就是做大宽表。</li>
+<li>dws公共汇总粒度事实层：以分析的主题对象作为建模驱动，构建公共粒度的汇总指标事实表，以宽表化手段物理化模型。主要存放派生指标（原子指标-订单总数+时间-近一天+修饰符-线上）</li>
+</ul>
+<ol start="3">
+<li>数据应用层application data service</li>
+</ol>
+<ul>
+<li>通常由ods 和 cdm加工而出，个性化统计指标数据</li>
+</ul>
+<h2 id="ods层表设计"><a href="#ods层表设计" class="headerlink" title="ods层表设计"></a>ods层表设计</h2><p>ods层的表其实不是数仓建模的范畴，因为存放都是贴源数据，但是合理的规划ods层并做好s数据同步是基础。</p>
+<h2 id="dim层设计"><a href="#dim层设计" class="headerlink" title="dim层设计"></a>dim层设计</h2><p>维度层是通过星型模型来构建的，有一个中心维度表也就是主维表，通过主维表关联出其他相关维度表。</p>
+<ol>
+<li>结合业务过程分析定义维度</li>
+<li>确认主维表（中心事实表），一般是由源系统直接同步到ods层的表。</li>
+<li>确认相关维度表，确认好了主维表，通过业务流程的梳理与主维表存在关联关系，确定维度信息形成相关维度表。</li>
+<li>确认维度属性，第一阶段生成主维表的维度属性，第二阶段生成相关维表的维度属性。</li>
+</ol>
+<h2 id="事实表"><a href="#事实表" class="headerlink" title="事实表"></a>事实表</h2><p>事实表遵循维度建模的设计过程：选择业务过程、确认粒度、确认维度、确认事实</p>
+<ol>
+<li>选择业务过程：维度建模，其实就是我们有什么需求，就根据需求去按照规则进行建模，选择业务过程就是明确我们的业务需求，确定我们的事实表的种类。首先我们应该分析业务的生命周期，整个生命周期出来之后我们需要确认我们业务的关键步骤，生命周期可能很长，这时候就需要从这些步骤里面抽取出我们需要的关键步骤。有了关键步骤，可能是一个可能是多个，根据业务的实际情况如果有多个业务过程，那么就应该使用累积快照事实表，如果是单个业务过程我们可能选择事务事实表，如果有固定时间间隔的可能需要周期快照事实表。</li>
+<li>确认粒度：我们选择好了业务过程以及确认好了事实表的种类，需要去声明粒度，其实就是我们每行数据存放的内容，这时候这个粒度应该是最细级别的粒度，如果是粒度是订单，其中我们的的订单表可能有父订单，父订单下面有子订单，这时候我们应该以子订单为粒度，作为每一行数据进行设计表。其实也就是我们使用的主键。</li>
+<li>确认维度：完成了粒度声明，其实知道每行数据的内容，这时候我们需要去描述业务过程中相关的维度信息。</li>
+<li>确定事实：事实表是某一主题的事实记录表，通过与维表关联和自身的度量数据组成。</li>
+<li>确认好事实表之后需要退化维度，针对一些最常用的维度和效率做宽表化处理。</li>
+</ol>
+<h2 id="公共汇总粒度事实层（DWS）"><a href="#公共汇总粒度事实层（DWS）" class="headerlink" title="公共汇总粒度事实层（DWS）"></a>公共汇总粒度事实层（DWS）</h2><p>以分析的主题作为建模驱动，基于上层应用和产品的指标需求构建公共粒度的汇总指标事实表，公共汇总的一个表对应一个派生指标。</p>
+<ol>
+<li>聚集是对原始明细粒度的数据进行汇总</li>
+<li>汇总层是面向分析对象的主题聚集建模</li>
+<li>聚集不跨越事实，聚集的维度和度量跟原始模型保持一直</li>
+<li>聚集可以带来查询性能的提升</li>
+<li>尽量把公共的汇总聚集沉淀到dws层</li>
+<li>以业务过程进行分类</li>
+</ol>
 
-<h2 id="调度算法DRF"><a href="#调度算法DRF" class="headerlink" title="调度算法DRF"></a>调度算法DRF</h2><p>dominant resource fairness:主要资源公平调度,主要是多种资源共同参与调度，不在是单一的内存、CPU、IO</p>
-<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">拿一个yarn上面的任务距离：<br>系统拥有<span class="hljs-number"> 9 </span>CORE<span class="hljs-number"> 18 </span>MEMORY<br>A任务需要<span class="hljs-number"> 1 </span>CORE<span class="hljs-number"> 4 </span>MEMORY，1/9 &lt; 4/18，那么A任务的Dominant Resource就是MEMORY = 2/9<br>B任务需要<span class="hljs-number"> 3 </span>CORE<span class="hljs-number"> 1 </span>MEMORY，3/9 &gt; 1/18，那么B任务的Diminant Resource就是CORE = 3/9<br>想要公平的调度那么最好结果就是 A*3 + B*2 = (3+6)9 CORE (12+2)14MEMORY<br></code></pre></td></tr></table></figure>
-<p>分配步骤</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-number">1</span>、启动了一个A任务<br><span class="hljs-number">2</span>、<span class="hljs-number">2</span>/<span class="hljs-number">9</span> &gt; <span class="hljs-number">0</span>，所以下一个启动一个B任务<br><span class="hljs-number">3</span>、<span class="hljs-number">2</span><span class="hljs-regexp">/9 &lt; 1/</span><span class="hljs-number">3</span>,A的权重还是比B小，所以还是启动一个A任务<br><span class="hljs-number">4</span>、<span class="hljs-number">4</span><span class="hljs-regexp">/9 &gt; 1/</span><span class="hljs-number">3</span>,这时候A比B的权重大了，启动一个B任务<br><span class="hljs-number">5</span>、<span class="hljs-number">4</span><span class="hljs-regexp">/9 &lt; 2/</span><span class="hljs-number">3</span>,这时候B的权重大了，启动一个A任务<br><span class="hljs-number">6</span>、<span class="hljs-number">6</span><span class="hljs-regexp">/9 = 2/</span><span class="hljs-number">3</span>,这时候已经没有办法分配新任务了<br>整理的逻辑尽可能的根据主要的权重资源去分析占比，然后轮流去分配<br></code></pre></td></tr></table></figure>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/40245793">https://zhuanlan.zhihu.com/p/40245793</a></p>
-</blockquote>
-<h2 id="公平调度策略"><a href="#公平调度策略" class="headerlink" title="公平调度策略"></a>公平调度策略</h2><p>这个调度策略旨在 队列 任务 容器 方面左到公平调度。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs">1、队列，资源分配的情况首先是队列之间的资源协调，每个平台上面可能会有多个队列，每个队列的使用情况可能不一样，所以如何选择队列去给这个队列分配资源就是在我们分配资源的第一步。<br>2、任务，这个是比队列更细的粒度。在队列里面有面临着多个任务的提交，这时候多个任务需要去在次队列里面去分配。<br>3、容器就是最小的资源粒度了。<br></code></pre></td></tr></table></figure>
-<p>公平调度的策略是应用在上面三个方面的分配的。每个阶段都是遵循着公平调度策列的。下面讲一下该策略</p>
-<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">首先理解一下几个指标：<br>1、实际的最小资源份额：思考一下什么是一个队列和一个任务的实际的最小资源份额，每个队列和任务肯定是有自己需要的资源量的，拿一个任务来说，该任务所在的队列可能只有10 C<span class="hljs-number"> 40 </span>R,但是它需要的资源量是<span class="hljs-number"> 20 </span>C<span class="hljs-number"> 80 </span>R,计算这个任务的最小资源份额肯定是不能超过它所在的队列的，所以它最小的资源份额只能是10 C<span class="hljs-number"> 40 </span>R。<br>2、是否饥饿：如何判断这个任务是不是处于饥饿状态呢？还是继续用上面的例子，可能第一次分配得到的<span class="hljs-number"> 5 </span>C<span class="hljs-number"> 20 </span>R，但是该任务需要的最小资源是10 C<span class="hljs-number"> 40 </span>R，得到的资源没有满足最小的资源份额，可以判断这个任务就处于饥饿的状态。<br>3、资源分配比：相当于我实际使用资源跟我需要的资源对比，其实就是 资源的使用量/最小的资源份额。<br>4、资源使用权重比：资源使用量/权重<br></code></pre></td></tr></table></figure>
-<p>具体的资源分配流程</p>
-<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs 1c">                        首先判断是否有队列/程序/container是否处于饥饿<br>                                               <span class="hljs-string">|</span><br>如果只有一个处于饥饿，那么肯定直接给这个分配资源 - - <span class="hljs-string">| - - 如果都不饥饿，根据资源使用权重比分配</span><br>                                               <span class="hljs-string">|</span><br>如果都处于饥饿，那么就按照资源的分配比来分配，资源分配比小，那就优先分配，相同的话就按照提交时间<br><br></code></pre></td></tr></table></figure>
-<p>这就是公平调度的策略</p>
-<p>##公平调度和容器调度<br>其实随着现在俩种调度器的互相借鉴，互补不足，俩种的功能越来越同质化。像hortonword默认使用的是容器调度，cloudera默认使用的是fair，目前高版本的hadoop默认使用的是capacity scheduler。像他们都是层级队列支持最大最小资源、资源抢占资源共享、不同的调度策略、支持优先级等。</p>
-<p>容器调度：共享集群</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs">1、支持给节点打标签，支持计算和存储分离<br>2、不同队列通过占比的方式配置<br></code></pre></td></tr></table></figure>
-
-<p>公平调度：公平调度</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs">1、队列内部支持FAIR（其实是最大最小化公平算法根据内存）的调度策略，容器调度里面没有<br>2、通过配置直接大小配置<br>3、限制每个用户的运行个数<br>4、支持为每个对垒设置不同的调度策略<br></code></pre></td></tr></table></figure>
             </div>
             <hr>
             <div>
               <div class="post-metas mb-3">
                 
-                
-                  <div class="post-meta">
-                    <i class="iconfont icon-tags"></i>
-                    
-                      <a class="hover-with-bg" href="/tags/yarn/">yarn</a>
-                    
-                  </div>
                 
               </div>
               
@@ -287,18 +321,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/01/08/hive%E5%BD%92%E6%A1%A3/">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">hive归档</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/06/08/hdfs%E6%95%B0%E6%8D%AE%E5%9C%A8%E8%AF%BB%E5%86%99%E6%97%B6%E5%80%99%E7%9A%84%E5%8F%AF%E8%A7%81%E6%80%A7/">
-                        <span class="hidden-mobile">hdfs数据在读写时候的可见性</span>
+                      <a href="/2024/05/01/%E6%8C%87%E6%A0%87%E5%BB%BA%E8%AE%BE/">
+                        <span class="hidden-mobile">指标建设</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

@@ -16,21 +16,20 @@
   <meta name="author" content="leeseven-li">
   <meta name="keywords" content="">
   
-    <meta name="description" content="公平调度和容量调度max-min fairness share最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。 12345678资源总数&#x2F;用户数&#x3D;每个用户的平均资源1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务举个例子：总资源">
+    <meta name="description" content="指标建设模型AARRR海盗模型 用户拉新(Acquisition) 用户激活(Activation) 用户留存(Retention) 商业变现(Revenue) 用户推荐(Refer)  A 用户拉新通过各种推广渠道,以各种方式获取目标用户，并对各种影响渠道的效果做评估，不断优化投入策略，降低获客成本。  新增用户数、激活率、注册转化率、新客留存率、下载量、安装量等  A 用户活跃活跃用户是指真正">
 <meta property="og:type" content="article">
-<meta property="og:title" content="yarn公平调度和容量调度">
-<meta property="og:url" content="https://blog.leeseven.online/2022/10/08/yarn%E5%85%AC%E5%B9%B3%E8%B0%83%E5%BA%A6%E5%92%8C%E5%AE%B9%E9%87%8F%E8%B0%83%E5%BA%A6/index.html">
+<meta property="og:title" content="指标建设">
+<meta property="og:url" content="https://blog.leeseven.online/2024/05/01/%E6%8C%87%E6%A0%87%E5%BB%BA%E8%AE%BE/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
-<meta property="og:description" content="公平调度和容量调度max-min fairness share最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。 12345678资源总数&#x2F;用户数&#x3D;每个用户的平均资源1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务举个例子：总资源">
+<meta property="og:description" content="指标建设模型AARRR海盗模型 用户拉新(Acquisition) 用户激活(Activation) 用户留存(Retention) 商业变现(Revenue) 用户推荐(Refer)  A 用户拉新通过各种推广渠道,以各种方式获取目标用户，并对各种影响渠道的效果做评估，不断优化投入策略，降低获客成本。  新增用户数、激活率、注册转化率、新客留存率、下载量、安装量等  A 用户活跃活跃用户是指真正">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-10-08T03:55:21.000Z">
-<meta property="article:modified_time" content="2024-01-08T09:01:04.924Z">
+<meta property="article:published_time" content="2024-05-01T09:06:34.000Z">
+<meta property="article:modified_time" content="2024-01-08T09:07:04.995Z">
 <meta property="article:author" content="leeseven-li">
-<meta property="article:tag" content="yarn">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>yarn公平调度和容量调度 - 大数据/开源/分享</title>
+  <title>指标建设 - 大数据/开源/分享</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -176,7 +175,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="yarn公平调度和容量调度">
+            <span class="h2" id="subtitle" title="指标建设">
               
             </span>
 
@@ -186,8 +185,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2022-10-08 11:55" pubdate>
-        2022年10月8日 中午
+      <time datetime="2024-05-01 17:06" pubdate>
+        2024年5月1日 下午
       </time>
     </span>
   
@@ -197,7 +196,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.9k 字
+      1k 字
     </span>
   
 
@@ -206,7 +205,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      16 分钟
+      9 分钟
     </span>
   
 
@@ -235,44 +234,55 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">yarn公平调度和容量调度</h1>
+            <h1 style="display: none">指标建设</h1>
             
             <div class="markdown-body">
-              <h1 id="公平调度和容量调度"><a href="#公平调度和容量调度" class="headerlink" title="公平调度和容量调度"></a>公平调度和容量调度</h1><h2 id="max-min-fairness-share"><a href="#max-min-fairness-share" class="headerlink" title="max-min fairness share"></a>max-min fairness share</h2><p>最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。</p>
-<figure class="highlight routeros"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><pre><code class="hljs routeros">资源总数/用户数=每个用户的平均资源<br>1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。<br>2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务<br>举个例子：<br>总资源：10 有4隔用户分别需求是：1 2 4 5<br>10/<span class="hljs-attribute">4</span>=2.5,每个用户分的平均资源是2.5<br>用户 1 2 都用不到2.5，他们分配的资源就是1+<span class="hljs-attribute">2</span>=3，身下2隔资源<br>用户3 4 的资源都不满足，所以2，2.5+2&gt;4,用户3可以满足，所以最后剩下的0.5+2.<span class="hljs-attribute">5</span>=3是用户4分的的资源<br></code></pre></td></tr></table></figure>
-
-<h2 id="调度算法DRF"><a href="#调度算法DRF" class="headerlink" title="调度算法DRF"></a>调度算法DRF</h2><p>dominant resource fairness:主要资源公平调度,主要是多种资源共同参与调度，不在是单一的内存、CPU、IO</p>
-<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">拿一个yarn上面的任务距离：<br>系统拥有<span class="hljs-number"> 9 </span>CORE<span class="hljs-number"> 18 </span>MEMORY<br>A任务需要<span class="hljs-number"> 1 </span>CORE<span class="hljs-number"> 4 </span>MEMORY，1/9 &lt; 4/18，那么A任务的Dominant Resource就是MEMORY = 2/9<br>B任务需要<span class="hljs-number"> 3 </span>CORE<span class="hljs-number"> 1 </span>MEMORY，3/9 &gt; 1/18，那么B任务的Diminant Resource就是CORE = 3/9<br>想要公平的调度那么最好结果就是 A*3 + B*2 = (3+6)9 CORE (12+2)14MEMORY<br></code></pre></td></tr></table></figure>
-<p>分配步骤</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-number">1</span>、启动了一个A任务<br><span class="hljs-number">2</span>、<span class="hljs-number">2</span>/<span class="hljs-number">9</span> &gt; <span class="hljs-number">0</span>，所以下一个启动一个B任务<br><span class="hljs-number">3</span>、<span class="hljs-number">2</span><span class="hljs-regexp">/9 &lt; 1/</span><span class="hljs-number">3</span>,A的权重还是比B小，所以还是启动一个A任务<br><span class="hljs-number">4</span>、<span class="hljs-number">4</span><span class="hljs-regexp">/9 &gt; 1/</span><span class="hljs-number">3</span>,这时候A比B的权重大了，启动一个B任务<br><span class="hljs-number">5</span>、<span class="hljs-number">4</span><span class="hljs-regexp">/9 &lt; 2/</span><span class="hljs-number">3</span>,这时候B的权重大了，启动一个A任务<br><span class="hljs-number">6</span>、<span class="hljs-number">6</span><span class="hljs-regexp">/9 = 2/</span><span class="hljs-number">3</span>,这时候已经没有办法分配新任务了<br>整理的逻辑尽可能的根据主要的权重资源去分析占比，然后轮流去分配<br></code></pre></td></tr></table></figure>
+              <h1 id="指标建设模型"><a href="#指标建设模型" class="headerlink" title="指标建设模型"></a>指标建设模型</h1><h2 id="AARRR海盗模型"><a href="#AARRR海盗模型" class="headerlink" title="AARRR海盗模型"></a>AARRR海盗模型</h2><ul>
+<li>用户拉新(Acquisition)</li>
+<li>用户激活(Activation)</li>
+<li>用户留存(Retention)</li>
+<li>商业变现(Revenue)</li>
+<li>用户推荐(Refer)</li>
+</ul>
+<h3 id="A-用户拉新"><a href="#A-用户拉新" class="headerlink" title="A 用户拉新"></a>A 用户拉新</h3><p>通过各种推广渠道,以各种方式获取目标用户，并对各种影响渠道的效果做评估，不断优化投入策略，降低获客成本。</p>
 <blockquote>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/40245793">https://zhuanlan.zhihu.com/p/40245793</a></p>
+<p>新增用户数、激活率、注册转化率、新客留存率、下载量、安装量等</p>
 </blockquote>
-<h2 id="公平调度策略"><a href="#公平调度策略" class="headerlink" title="公平调度策略"></a>公平调度策略</h2><p>这个调度策略旨在 队列 任务 容器 方面左到公平调度。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs">1、队列，资源分配的情况首先是队列之间的资源协调，每个平台上面可能会有多个队列，每个队列的使用情况可能不一样，所以如何选择队列去给这个队列分配资源就是在我们分配资源的第一步。<br>2、任务，这个是比队列更细的粒度。在队列里面有面临着多个任务的提交，这时候多个任务需要去在次队列里面去分配。<br>3、容器就是最小的资源粒度了。<br></code></pre></td></tr></table></figure>
-<p>公平调度的策略是应用在上面三个方面的分配的。每个阶段都是遵循着公平调度策列的。下面讲一下该策略</p>
-<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">首先理解一下几个指标：<br>1、实际的最小资源份额：思考一下什么是一个队列和一个任务的实际的最小资源份额，每个队列和任务肯定是有自己需要的资源量的，拿一个任务来说，该任务所在的队列可能只有10 C<span class="hljs-number"> 40 </span>R,但是它需要的资源量是<span class="hljs-number"> 20 </span>C<span class="hljs-number"> 80 </span>R,计算这个任务的最小资源份额肯定是不能超过它所在的队列的，所以它最小的资源份额只能是10 C<span class="hljs-number"> 40 </span>R。<br>2、是否饥饿：如何判断这个任务是不是处于饥饿状态呢？还是继续用上面的例子，可能第一次分配得到的<span class="hljs-number"> 5 </span>C<span class="hljs-number"> 20 </span>R，但是该任务需要的最小资源是10 C<span class="hljs-number"> 40 </span>R，得到的资源没有满足最小的资源份额，可以判断这个任务就处于饥饿的状态。<br>3、资源分配比：相当于我实际使用资源跟我需要的资源对比，其实就是 资源的使用量/最小的资源份额。<br>4、资源使用权重比：资源使用量/权重<br></code></pre></td></tr></table></figure>
-<p>具体的资源分配流程</p>
-<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs 1c">                        首先判断是否有队列/程序/container是否处于饥饿<br>                                               <span class="hljs-string">|</span><br>如果只有一个处于饥饿，那么肯定直接给这个分配资源 - - <span class="hljs-string">| - - 如果都不饥饿，根据资源使用权重比分配</span><br>                                               <span class="hljs-string">|</span><br>如果都处于饥饿，那么就按照资源的分配比来分配，资源分配比小，那就优先分配，相同的话就按照提交时间<br><br></code></pre></td></tr></table></figure>
-<p>这就是公平调度的策略</p>
-<p>##公平调度和容器调度<br>其实随着现在俩种调度器的互相借鉴，互补不足，俩种的功能越来越同质化。像hortonword默认使用的是容器调度，cloudera默认使用的是fair，目前高版本的hadoop默认使用的是capacity scheduler。像他们都是层级队列支持最大最小资源、资源抢占资源共享、不同的调度策略、支持优先级等。</p>
-<p>容器调度：共享集群</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs">1、支持给节点打标签，支持计算和存储分离<br>2、不同队列通过占比的方式配置<br></code></pre></td></tr></table></figure>
+<h3 id="A-用户活跃"><a href="#A-用户活跃" class="headerlink" title="A 用户活跃"></a>A 用户活跃</h3><p>活跃用户是指真正开始使用了产品的价值，我们需要掌握用户的行为数据，监控产品的健康程度。这个模块主要反馈用户进入产品的表现，是产品体验的核心所在，</p>
+<blockquote>
+<p>DAU&#x2F;MAU、日均使用时间、启动app时长、启动app的次数</p>
+</blockquote>
+<h3 id="R-用户留存"><a href="#R-用户留存" class="headerlink" title="R 用户留存"></a>R 用户留存</h3><p>衡量用户粘性和质量的指标</p>
+<blockquote>
+<p>留存率、流失率</p>
+</blockquote>
+<h3 id="R-变现"><a href="#R-变现" class="headerlink" title="R 变现"></a>R 变现</h3><p>主要用来衡量产品商业价值。</p>
+<blockquote>
+<p>生命周期价值、客单价、GMV</p>
+</blockquote>
+<h3 id="R-推荐"><a href="#R-推荐" class="headerlink" title="R 推荐"></a>R 推荐</h3><p>衡量用户自传播和口碑的情况。</p>
+<blockquote>
+<p>邀请率、裂变系数</p>
+</blockquote>
+<h2 id="OSM-Obejective-Strategy-Measurement-模型"><a href="#OSM-Obejective-Strategy-Measurement-模型" class="headerlink" title="OSM(Obejective,Strategy,Measurement)模型"></a>OSM(Obejective,Strategy,Measurement)模型</h2><p>OSM模型是指标体系建设过程中辅助确定核心的重要方法，包含业务目标、业务策略、业务度量。</p>
+<h3 id="Obejective"><a href="#Obejective" class="headerlink" title="Obejective"></a>Obejective</h3><p>目标：思考的就是产品的目标、满足用户什么需求、主要是从客户角度去确定目标。以某一个周边游新增模块举例：目标就是让用户可以利用周末时间方便的短期旅游，能方便的找到自己想游玩的地方并且节省了攻略时间。</p>
+<h2 id="S-Strategy"><a href="#S-Strategy" class="headerlink" title="S Strategy"></a>S Strategy</h2><p>策略：使用什么样的策略可以让用户觉得自己的需求得到了满足。</p>
+<ul>
+<li>个性化推荐： 通过用户点击浏览行为，推荐用户比较热门的景点。</li>
+<li>时间方便：提供不同的方案，一天游玩，俩天游玩，规划好不同方案的出行攻略，这样可以不用用户自己做攻略，把浏览路线花费的大概时间都详细说明。</li>
+<li>坐车方面：来回每天都有来回的专车，早上直接从市里触发，下午返回。中途去其他景点也不需要自己找车，固定路线都是车接车送。</li>
+<li>安全方面：都是由经验丰富的老司机和导游，每个人都会出行保险。</li>
+<li>住宿方便：如果需要过夜的提供不同的住宿规格，豪华型、舒适性都有，不用自己再去搜索附近酒店，价格也比较透明。</li>
+</ul>
+<h2 id="M-measurement"><a href="#M-measurement" class="headerlink" title="M measurement"></a>M measurement</h2><p>度量：有了我们指定的策略，根据策略就可以去指定指标，指标分为过程指标和结果指标。</p>
+<h3 id="结果指标"><a href="#结果指标" class="headerlink" title="结果指标"></a>结果指标</h3><p>衡量用户发生某个动作之后产生的结果，最终就是查看用户的需求是否得到了满足。<br>针对上面的问题思考：下单率、取消率、景点评分情况、服务评分。</p>
+<h4 id="过程指标"><a href="#过程指标" class="headerlink" title="过程指标"></a>过程指标</h4><p>主要用户动作之中产生的指标，其中维度是整体体系不能缺少的东西，有了维度才能去思考有哪些指标。<br>供需比、地点选择、司机服务分、代理机构评分</p>
 
-<p>公平调度：公平调度</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs">1、队列内部支持FAIR（其实是最大最小化公平算法根据内存）的调度策略，容器调度里面没有<br>2、通过配置直接大小配置<br>3、限制每个用户的运行个数<br>4、支持为每个对垒设置不同的调度策略<br></code></pre></td></tr></table></figure>
             </div>
             <hr>
             <div>
               <div class="post-metas mb-3">
                 
-                
-                  <div class="post-meta">
-                    <i class="iconfont icon-tags"></i>
-                    
-                      <a class="hover-with-bg" href="/tags/yarn/">yarn</a>
-                    
-                  </div>
                 
               </div>
               
@@ -287,9 +297,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/01/08/hive%E5%BD%92%E6%A1%A3/">
+                      <a href="/2024/06/14/%E6%95%B0%E4%BB%93QA/">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">hive归档</span>
+                        <span class="hidden-mobile">数仓QA</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -297,8 +307,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/06/08/hdfs%E6%95%B0%E6%8D%AE%E5%9C%A8%E8%AF%BB%E5%86%99%E6%97%B6%E5%80%99%E7%9A%84%E5%8F%AF%E8%A7%81%E6%80%A7/">
-                        <span class="hidden-mobile">hdfs数据在读写时候的可见性</span>
+                      <a href="/2024/01/08/spark%E8%83%8C%E5%8E%8B/">
+                        <span class="hidden-mobile">spark背压</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

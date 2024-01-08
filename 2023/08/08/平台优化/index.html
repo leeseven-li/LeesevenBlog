@@ -16,21 +16,20 @@
   <meta name="author" content="leeseven-li">
   <meta name="keywords" content="">
   
-    <meta name="description" content="公平调度和容量调度max-min fairness share最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。 12345678资源总数&#x2F;用户数&#x3D;每个用户的平均资源1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务举个例子：总资源">
+    <meta name="description" content="大数据平台优化存储优化 存储格式   text-&gt;parquet：平台文件最开始就是文本存储，因为列式存储的优势很多：相同类型的列放在一起可以使用更适合的编码格式以及压缩算法，有效的减少数据量；在查询上，因为现在很多的查询优化可以直接作用在物理执行计划上，像谓词下推，通过查询优化直接作用到存储上，从源头就减少了数据读取，大大提高了整体的性能；列存储上面还可以对数据进行一些统计和生成索引对sq">
 <meta property="og:type" content="article">
-<meta property="og:title" content="yarn公平调度和容量调度">
-<meta property="og:url" content="https://blog.leeseven.online/2022/10/08/yarn%E5%85%AC%E5%B9%B3%E8%B0%83%E5%BA%A6%E5%92%8C%E5%AE%B9%E9%87%8F%E8%B0%83%E5%BA%A6/index.html">
+<meta property="og:title" content="平台优化">
+<meta property="og:url" content="https://blog.leeseven.online/2023/08/08/%E5%B9%B3%E5%8F%B0%E4%BC%98%E5%8C%96/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
-<meta property="og:description" content="公平调度和容量调度max-min fairness share最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。 12345678资源总数&#x2F;用户数&#x3D;每个用户的平均资源1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务举个例子：总资源">
+<meta property="og:description" content="大数据平台优化存储优化 存储格式   text-&gt;parquet：平台文件最开始就是文本存储，因为列式存储的优势很多：相同类型的列放在一起可以使用更适合的编码格式以及压缩算法，有效的减少数据量；在查询上，因为现在很多的查询优化可以直接作用在物理执行计划上，像谓词下推，通过查询优化直接作用到存储上，从源头就减少了数据读取，大大提高了整体的性能；列存储上面还可以对数据进行一些统计和生成索引对sq">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-10-08T03:55:21.000Z">
-<meta property="article:modified_time" content="2024-01-08T09:01:04.924Z">
+<meta property="article:published_time" content="2023-08-08T13:10:43.000Z">
+<meta property="article:modified_time" content="2024-01-08T09:11:04.043Z">
 <meta property="article:author" content="leeseven-li">
-<meta property="article:tag" content="yarn">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>yarn公平调度和容量调度 - 大数据/开源/分享</title>
+  <title>平台优化 - 大数据/开源/分享</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -176,7 +175,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="yarn公平调度和容量调度">
+            <span class="h2" id="subtitle" title="平台优化">
               
             </span>
 
@@ -186,8 +185,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2022-10-08 11:55" pubdate>
-        2022年10月8日 中午
+      <time datetime="2023-08-08 21:10" pubdate>
+        2023年8月8日 晚上
       </time>
     </span>
   
@@ -197,7 +196,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.9k 字
+      1.8k 字
     </span>
   
 
@@ -206,7 +205,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      16 分钟
+      15 分钟
     </span>
   
 
@@ -235,44 +234,77 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">yarn公平调度和容量调度</h1>
+            <h1 style="display: none">平台优化</h1>
             
             <div class="markdown-body">
-              <h1 id="公平调度和容量调度"><a href="#公平调度和容量调度" class="headerlink" title="公平调度和容量调度"></a>公平调度和容量调度</h1><h2 id="max-min-fairness-share"><a href="#max-min-fairness-share" class="headerlink" title="max-min fairness share"></a>max-min fairness share</h2><p>最大值最小化公平分配算法：尽可能满足最小的需求，然后把剩下的资源公平的分配给其他的需求。</p>
-<figure class="highlight routeros"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><pre><code class="hljs routeros">资源总数/用户数=每个用户的平均资源<br>1、用户的平均资源都不能满足最小的资源需求，那么每个用户分到的资源就是平均资源。<br>2、如果能满足一些用户的需求，同时这些用户使用不到平均资源量，那么可以把剩下的资源平均分给其他的任务<br>举个例子：<br>总资源：10 有4隔用户分别需求是：1 2 4 5<br>10/<span class="hljs-attribute">4</span>=2.5,每个用户分的平均资源是2.5<br>用户 1 2 都用不到2.5，他们分配的资源就是1+<span class="hljs-attribute">2</span>=3，身下2隔资源<br>用户3 4 的资源都不满足，所以2，2.5+2&gt;4,用户3可以满足，所以最后剩下的0.5+2.<span class="hljs-attribute">5</span>=3是用户4分的的资源<br></code></pre></td></tr></table></figure>
+              <h1 id="大数据平台优化"><a href="#大数据平台优化" class="headerlink" title="大数据平台优化"></a>大数据平台优化</h1><h2 id="存储优化"><a href="#存储优化" class="headerlink" title="存储优化"></a>存储优化</h2><ul>
+<li>存储格式</li>
+</ul>
+<ol>
+<li><p>text-&gt;parquet：平台文件最开始就是文本存储，因为列式存储的优势很多：相同类型的列放在一起可以使用更适合的编码格式以及压缩算法，有效的减少数据量；在查询上，因为现在很多的查询优化可以直接作用在物理执行计划上，像谓词下推，通过查询优化直接作用到存储上，从源头就减少了数据读取，大大提高了整体的性能；列存储上面还可以对数据进行一些统计和生成索引对sql对查询优化提高明显。</p>
+</li>
+<li><p>常用对列式存储主要式orc和parquet，parquet有更好的嵌套类型实现，支持更多的编码格式，更广泛的适配。orc相对于hive来说更加的紧密，可以提供更好的存储和查询性能，还可以支持hive的acid。orc相对parquet来说对hive对适配性更好，能提供更好对压缩和查询性能，只支持简单对嵌套类型，支持hive对acid。</p>
+</li>
+</ol>
+<ul>
+<li>小文件</li>
+</ul>
+<p>小文件带来的危害：</p>
+<ul>
+<li>大量的小文件元数据是存在namenode内存种的，占用太多的内存导致namenode的性能跟不上，导致系统变慢</li>
+<li>可能对文件的读取写入性能影响，大部分时间都耗在了连接和启动释放他ask上面</li>
+</ul>
+<p>1.分析小文件<br>通过dump出namenode的fsimage文件，然后通过hdfs自带的命令解析，最终放到hive表种，分别对每个租户的目录和hive的warehouse下面进行小文件分析。针对hdfs非hive数据分析出小于10M的文件，单个目录下有2个以上小于10M的文件。针对hive的数据主要是对hive表分区为统计粒度，然后分析出每个分区里面的小文件数量。<br>2.设置小文件输入<br>基本上都是hive表存储，所以合理的设置map输入小文件和并和输出小文件合并，通过读取的时候设置小文件合并可以减少maptask的启动，这样每个map处理的数据量也变多了，这样如果在没有reduce的job种，可以把结果小文件减少。<br>3.设置输出小文件合并<br>在hive执行任务的时候，如果判断最终生成的小文件平均大小小于16M的时候回重新启动一个job去合并小文件，牺牲了一些性能，但是对平台的长远考虑是有好处的<br>4.设置历史外表数据归档<br>我们一般有专门的外表目录存放一些原系统或者其他系统传过来的文本文件，这样的文件可能是我们使用用来加载内表的文件，一般也回保存一段时间，如果比较重要的可能全部保留，所以对一个月以前的数据进行单独的合并压缩操作，使用zstd，减少空间和元数据的占用<br>5.设置内表数据归档<br>我们会把把半年前的数据进行hvie归档操作，这样的话，可以很有效的减少了小文件的数量，同时对一些历史数据很多，但是每天数据量不大的表，单独进行合并分区的操作，这样合并了多个分区，也把小文件合并了。</p>
+<ul>
+<li>压缩，纠错码</li>
+</ul>
+<ol>
+<li><p>数据文件压缩使用zstd压缩，比较新对一种压缩算法，在压缩率和性能上面都比较突出。我们自己测试的来看基本上都是第一。压缩时间（越小越好）：lz4, zstd &lt; lzo &lt; snappy &lt;&lt; gzip-1 &lt; lz4-9 &lt; gzip &lt; gzip-9 &lt; lzo-9 ；压缩率（越大越好）：zstd-10 &gt; zstd &gt;&gt; lz4-9 &gt; gzip-9 &gt; gzip, lzo-9 &gt;&gt; lz4, gzip-1 &gt; snappy, lzo。对于外表数据节省了80%以上的空间。</p>
+</li>
+<li><p>升级cdp之后，针对使用频率比较低的目录，使用纠删码来减少数据的容易，减少存储成本。</p>
+</li>
+</ol>
+<h2 id="计算优化"><a href="#计算优化" class="headerlink" title="计算优化"></a>计算优化</h2><ul>
+<li>资源优化</li>
+</ul>
+<ol>
+<li>调整内存和cpu使用的比例，防止出现cpu用完了，内存还剩不少；内存用完了cpu还剩不少。</li>
+<li>根据文件大小、不同场景适配不同的模版参数。</li>
+<li>设置不同的队列，单独给小任务配置小的任务队列。</li>
+</ol>
+<ul>
+<li>并发优化</li>
+</ul>
+<ol>
+<li>全资产根据血缘关系以及项目重要系数计算优先级，按照优先级加载</li>
+</ol>
+<h2 id="逻辑优化"><a href="#逻辑优化" class="headerlink" title="逻辑优化"></a>逻辑优化</h2><ul>
+<li>空文件加载</li>
+</ul>
+<ol>
+<li>针对文件不在执行yarn任务。直接操作元数据进行当天任务加载。</li>
+</ol>
+<ul>
+<li>清理优化</li>
+</ul>
+<ol>
+<li>不同场景加载执行清理，减少平台整体存储的数据量。</li>
+</ol>
+<ul>
+<li>sql优化</li>
+</ul>
+<ol>
+<li>开启mapjoin</li>
+<li>针对一些当前表使用spark加载，使用单独的队列，实现快速加载</li>
+<li>小于10M的表全部使用本地模式进行加载</li>
+<li>根据历史任务手动设置reduce的数量，切换到tez之后开启动态reduce个数调整，进行设置合理的reduce减少资源的浪费以及小文件的生成。</li>
+</ol>
 
-<h2 id="调度算法DRF"><a href="#调度算法DRF" class="headerlink" title="调度算法DRF"></a>调度算法DRF</h2><p>dominant resource fairness:主要资源公平调度,主要是多种资源共同参与调度，不在是单一的内存、CPU、IO</p>
-<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">拿一个yarn上面的任务距离：<br>系统拥有<span class="hljs-number"> 9 </span>CORE<span class="hljs-number"> 18 </span>MEMORY<br>A任务需要<span class="hljs-number"> 1 </span>CORE<span class="hljs-number"> 4 </span>MEMORY，1/9 &lt; 4/18，那么A任务的Dominant Resource就是MEMORY = 2/9<br>B任务需要<span class="hljs-number"> 3 </span>CORE<span class="hljs-number"> 1 </span>MEMORY，3/9 &gt; 1/18，那么B任务的Diminant Resource就是CORE = 3/9<br>想要公平的调度那么最好结果就是 A*3 + B*2 = (3+6)9 CORE (12+2)14MEMORY<br></code></pre></td></tr></table></figure>
-<p>分配步骤</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-number">1</span>、启动了一个A任务<br><span class="hljs-number">2</span>、<span class="hljs-number">2</span>/<span class="hljs-number">9</span> &gt; <span class="hljs-number">0</span>，所以下一个启动一个B任务<br><span class="hljs-number">3</span>、<span class="hljs-number">2</span><span class="hljs-regexp">/9 &lt; 1/</span><span class="hljs-number">3</span>,A的权重还是比B小，所以还是启动一个A任务<br><span class="hljs-number">4</span>、<span class="hljs-number">4</span><span class="hljs-regexp">/9 &gt; 1/</span><span class="hljs-number">3</span>,这时候A比B的权重大了，启动一个B任务<br><span class="hljs-number">5</span>、<span class="hljs-number">4</span><span class="hljs-regexp">/9 &lt; 2/</span><span class="hljs-number">3</span>,这时候B的权重大了，启动一个A任务<br><span class="hljs-number">6</span>、<span class="hljs-number">6</span><span class="hljs-regexp">/9 = 2/</span><span class="hljs-number">3</span>,这时候已经没有办法分配新任务了<br>整理的逻辑尽可能的根据主要的权重资源去分析占比，然后轮流去分配<br></code></pre></td></tr></table></figure>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/40245793">https://zhuanlan.zhihu.com/p/40245793</a></p>
-</blockquote>
-<h2 id="公平调度策略"><a href="#公平调度策略" class="headerlink" title="公平调度策略"></a>公平调度策略</h2><p>这个调度策略旨在 队列 任务 容器 方面左到公平调度。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs">1、队列，资源分配的情况首先是队列之间的资源协调，每个平台上面可能会有多个队列，每个队列的使用情况可能不一样，所以如何选择队列去给这个队列分配资源就是在我们分配资源的第一步。<br>2、任务，这个是比队列更细的粒度。在队列里面有面临着多个任务的提交，这时候多个任务需要去在次队列里面去分配。<br>3、容器就是最小的资源粒度了。<br></code></pre></td></tr></table></figure>
-<p>公平调度的策略是应用在上面三个方面的分配的。每个阶段都是遵循着公平调度策列的。下面讲一下该策略</p>
-<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">首先理解一下几个指标：<br>1、实际的最小资源份额：思考一下什么是一个队列和一个任务的实际的最小资源份额，每个队列和任务肯定是有自己需要的资源量的，拿一个任务来说，该任务所在的队列可能只有10 C<span class="hljs-number"> 40 </span>R,但是它需要的资源量是<span class="hljs-number"> 20 </span>C<span class="hljs-number"> 80 </span>R,计算这个任务的最小资源份额肯定是不能超过它所在的队列的，所以它最小的资源份额只能是10 C<span class="hljs-number"> 40 </span>R。<br>2、是否饥饿：如何判断这个任务是不是处于饥饿状态呢？还是继续用上面的例子，可能第一次分配得到的<span class="hljs-number"> 5 </span>C<span class="hljs-number"> 20 </span>R，但是该任务需要的最小资源是10 C<span class="hljs-number"> 40 </span>R，得到的资源没有满足最小的资源份额，可以判断这个任务就处于饥饿的状态。<br>3、资源分配比：相当于我实际使用资源跟我需要的资源对比，其实就是 资源的使用量/最小的资源份额。<br>4、资源使用权重比：资源使用量/权重<br></code></pre></td></tr></table></figure>
-<p>具体的资源分配流程</p>
-<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs 1c">                        首先判断是否有队列/程序/container是否处于饥饿<br>                                               <span class="hljs-string">|</span><br>如果只有一个处于饥饿，那么肯定直接给这个分配资源 - - <span class="hljs-string">| - - 如果都不饥饿，根据资源使用权重比分配</span><br>                                               <span class="hljs-string">|</span><br>如果都处于饥饿，那么就按照资源的分配比来分配，资源分配比小，那就优先分配，相同的话就按照提交时间<br><br></code></pre></td></tr></table></figure>
-<p>这就是公平调度的策略</p>
-<p>##公平调度和容器调度<br>其实随着现在俩种调度器的互相借鉴，互补不足，俩种的功能越来越同质化。像hortonword默认使用的是容器调度，cloudera默认使用的是fair，目前高版本的hadoop默认使用的是capacity scheduler。像他们都是层级队列支持最大最小资源、资源抢占资源共享、不同的调度策略、支持优先级等。</p>
-<p>容器调度：共享集群</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs">1、支持给节点打标签，支持计算和存储分离<br>2、不同队列通过占比的方式配置<br></code></pre></td></tr></table></figure>
-
-<p>公平调度：公平调度</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs">1、队列内部支持FAIR（其实是最大最小化公平算法根据内存）的调度策略，容器调度里面没有<br>2、通过配置直接大小配置<br>3、限制每个用户的运行个数<br>4、支持为每个对垒设置不同的调度策略<br></code></pre></td></tr></table></figure>
             </div>
             <hr>
             <div>
               <div class="post-metas mb-3">
                 
-                
-                  <div class="post-meta">
-                    <i class="iconfont icon-tags"></i>
-                    
-                      <a class="hover-with-bg" href="/tags/yarn/">yarn</a>
-                    
-                  </div>
                 
               </div>
               
@@ -287,9 +319,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/01/08/hive%E5%BD%92%E6%A1%A3/">
+                      <a href="/2024/01/08/spark%E8%83%8C%E5%8E%8B/">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">hive归档</span>
+                        <span class="hidden-mobile">spark背压</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -297,8 +329,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/06/08/hdfs%E6%95%B0%E6%8D%AE%E5%9C%A8%E8%AF%BB%E5%86%99%E6%97%B6%E5%80%99%E7%9A%84%E5%8F%AF%E8%A7%81%E6%80%A7/">
-                        <span class="hidden-mobile">hdfs数据在读写时候的可见性</span>
+                      <a href="/2023/04/08/hdfs%E9%80%8F%E6%98%8E%E6%95%B0%E6%8D%AE%E5%8A%A0%E5%AF%86/">
+                        <span class="hidden-mobile">hdfs透明数据加密</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
