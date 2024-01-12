@@ -17,15 +17,15 @@
   <meta name="keywords" content="">
   
     <meta property="og:type" content="website">
-<meta property="og:title" content="归档">
-<meta property="og:url" content="https://blog.leeseven.online/archives/2022/index.html">
+<meta property="og:title" content="大数据&#x2F;开源&#x2F;分享">
+<meta property="og:url" content="https://blog.leeseven.online/page/3/index.html">
 <meta property="og:site_name" content="大数据&#x2F;开源&#x2F;分享">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="leeseven-li">
 <meta name="twitter:card" content="summary_large_image">
   
   
-  <title>归档 - 大数据/开源/分享</title>
+  <title>大数据/开源/分享</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
@@ -156,7 +156,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="归档">
+            <span class="h2" id="subtitle" title="追风赶月莫停留，平芜尽处是春山。">
               
             </span>
 
@@ -180,83 +180,61 @@
               <div class="col-12 col-md-10 m-auto">
                 
 
-<div class="list-group">
-  <p class="h4">共计 21 篇文章</p>
-  <hr>
-  
-  
+
+  <div class="row mx-auto index-card">
     
-      
-      <p class="h5">2022</p>
     
-    <a href="/2022/10/08/yarn%E5%85%AC%E5%B9%B3%E8%B0%83%E5%BA%A6%E5%92%8C%E5%AE%B9%E9%87%8F%E8%B0%83%E5%BA%A6/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">yarn公平调度和容量调度</span>
-      <time style="float: right;">10-08</time>
-    </a>
-  
-    
-    <a href="/2022/06/08/hdfs%E6%95%B0%E6%8D%AE%E5%9C%A8%E8%AF%BB%E5%86%99%E6%97%B6%E5%80%99%E7%9A%84%E5%8F%AF%E8%A7%81%E6%80%A7/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">hdfs数据在读写时候的可见性</span>
-      <time style="float: right;">06-08</time>
-    </a>
-  
-    
-    <a href="/2022/05/08/2pc%20paxos%20zab/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">2pc paxos zab</span>
-      <time style="float: right;">05-08</time>
-    </a>
-  
-    
-    <a href="/2022/03/22/flink%E7%9A%84exactly-once/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">flink的exactly-once</span>
-      <time style="float: right;">03-22</time>
-    </a>
-  
-    
-    <a href="/2022/03/14/flink%E7%9A%84checkpint%E6%9C%BA%E5%88%B6%E5%AD%A6%E4%B9%A0/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">flink的checkpint机制学习</span>
-      <time style="float: right;">03-14</time>
-    </a>
-  
-    
-    <a href="/2022/03/10/hash%E7%AE%97%E6%B3%95%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">hash算法和一致性hash算法</span>
-      <time style="float: right;">03-10</time>
-    </a>
-  
-    
-    <a href="/2022/03/08/%E5%B8%B8%E7%94%A8%E5%8E%8B%E7%BC%A9%E7%BC%96%E7%A0%81/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">常用压缩编码</span>
-      <time style="float: right;">03-08</time>
-    </a>
-  
-    
-    <a href="/2022/03/08/calcite%E5%AD%A6%E4%B9%A0/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">calcite学习</span>
-      <time style="float: right;">03-08</time>
-    </a>
-  
-    
-    <a href="/2022/03/04/hivesql%E4%BC%98%E5%8C%96/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">hivesql优化</span>
-      <time style="float: right;">03-04</time>
-    </a>
-  
-    
-    <a href="/2022/03/02/hive-mapjoin%E6%8E%A2%E7%B4%A2/" class="list-group-item list-group-item-action">
-      <span class="archive-post-title">hive-mapjoin探索</span>
-      <time style="float: right;">03-02</time>
-    </a>
-  
-</div>
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2022/02/09/orc-vs-parquet/" target="_self">
+          orc和parquet
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2022/02/09/orc-vs-parquet/" target="_self">
+          
+          orc vs parquetorc和parquet是我们在hive中常用点列式存储格式，各自有各自点特点，下面介绍一下烈士存储点优势以及它们之间点差异。 列式存储的优势列式存储把每列数据存在一起，同类型的列放在一起，通过LRU、字典、bit-packing等编码可以很大程度上减少数据的存储，对同类型数据的压缩效果也比混合类型的压缩好很多。每列数据在一起，我们在查询的是同可以通过映射下推有效的去除不
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2022-02-09 17:39" pubdate>
+              2022-02-09
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/">数据存储</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E5%88%97%E5%BC%8F%E5%AD%98%E5%82%A8/">列式存储</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
 
 
   <nav aria-label="navigation">
     <span class="pagination" id="pagination">
-      <span class="page-number current">1</span><a class="page-number" href="/archives/2022/page/2/#board">2</a><a class="extend next" rel="next" href="/archives/2022/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
+      <a class="extend prev" rel="prev" href="/page/2/#board"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/#board">2</a><span class="page-number current">3</span>
     </span>
   </nav>
-
 
 
 
